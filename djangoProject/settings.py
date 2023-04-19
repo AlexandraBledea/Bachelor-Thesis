@@ -1,3 +1,7 @@
+import environ
+
+env = environ.Env()
+environ.Env.read_env()
 """
 Django settings for djangoProject project.
 
@@ -38,6 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'speechEmotionRecognition.apps.SpeechemotionrecognitionConfig',
     'corsheaders',
+    'rest_framework',
+    'knox'
 ]
 
 MIDDLEWARE = [
@@ -77,10 +83,16 @@ WSGI_APPLICATION = 'djangoProject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+SECRET_KEY = env("SECRET_KEY")
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': env("DB_NAME"),
+        'USER': env("DB_USER"),
+        'PASSWORD': env("DB_PASSWORD"),
+        'HOST': env("DB_HOST"),
+        'PORT': env("DB_PORT"),
     }
 }
 
@@ -127,3 +139,11 @@ CORS_ORIGIN_ALLOW_ALL = True
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        # 'rest_framework.authentication.BasicAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
+        'know.auth.TokenAuthentication'
+    ]
+}
