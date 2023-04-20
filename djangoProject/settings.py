@@ -1,5 +1,6 @@
 import environ
 
+
 env = environ.Env()
 environ.Env.read_env()
 """
@@ -34,16 +35,21 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
+    # 'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'speechEmotionRecognition.apps.SpeechemotionrecognitionConfig',
-    'corsheaders',
+    # 'django.contrib.sessions',
+    # 'django.contrib.messages',
+    # 'django.contrib.staticfiles',
+    # 'database.apps.DatabaseConfig',
+    # 'database'
+    # 'speechEmotionRecognition.apps.SpeechEmotionRecognitionConfig',
+    'authentication.apps.AuthenticationConfig',
+    # 'corsheaders',
     'rest_framework',
-    'knox'
+    # 'djoser',
+    'knox',
+    # 'sqlalchemy'
 ]
 
 MIDDLEWARE = [
@@ -84,6 +90,7 @@ WSGI_APPLICATION = 'djangoProject.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 SECRET_KEY = env("SECRET_KEY")
+
 
 DATABASES = {
     'default': {
@@ -134,6 +141,7 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_WHITELIST = ('http://localhost:8081',)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -144,6 +152,11 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         # 'rest_framework.authentication.BasicAuthentication',
         # 'rest_framework.authentication.SessionAuthentication',
-        'know.auth.TokenAuthentication'
+        'knox.auth.TokenAuthentication',
+        # 'rest-framework_simplejwt.authentication.JWTAuthentication'
     ]
 }
+#
+# SIMPLE_JWT = {
+#     'AUTH_HEADER_TYPES': ('JWT',),
+# }
