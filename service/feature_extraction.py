@@ -54,8 +54,8 @@ def extract_mfcc(signal, sample_rate):
     mfcc = np.mean(librosa.feature.mfcc(y=signal, sr=sample_rate, n_mfcc=40).T, axis=0)
     return mfcc
 
-def extract_features(sig, sr):
 
+def extract_features(sig, sr):
     result = np.array([])
 
     # We are stacking the features horizontally
@@ -67,14 +67,17 @@ def extract_features(sig, sr):
 
     return result
 
+
 def noise(data):
-    noise_amp = 0.035*np.random.uniform()*np.amax(data)
-    data = data + noise_amp*np.random.normal(size=data.shape[0])
+    noise_amp = 0.035 * np.random.uniform() * np.amax(data)
+    data = data + noise_amp * np.random.normal(size=data.shape[0])
     return data
 
+
 def stretch(data, rate=0.8):
-    shift_range = int(np.random.uniform(low=-5, high=5)*1000)
+    shift_range = int(np.random.uniform(low=-5, high=5) * 1000)
     return np.roll(data, shift_range)
+
 
 def pitch(data, sampling_rate, pitch_factor=0.7):
     return librosa.effects.pitch_shift(data, sampling_rate, pitch_factor)

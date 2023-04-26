@@ -11,6 +11,7 @@ from functools import wraps
 from controllers.register import RegisterView
 from controllers.login import LoginView
 from controllers.change_password import ChangePasswordView
+from controllers.predict_emotion import EmotionView
 
 load_dotenv()
 
@@ -83,6 +84,7 @@ def home():
 
 
 api.add_resource(UserView, '/users')
+api.add_resource(EmotionView, '/get-prediction')
 api.add_resource(RegisterView, '/register')
 api.add_resource(LoginView, '/login')
 api.add_resource(ChangePasswordView, '/login/change-password')

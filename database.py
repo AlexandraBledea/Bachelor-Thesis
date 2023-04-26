@@ -27,6 +27,26 @@ class User(db.Model):
         return {"firstname": self.firstname, "lastname": self.lastname, "gender": self.gender, "email": self.email}
 
 
+class Recording(db.Model):
+    __tablename__ = 'recording'
+
+    id = db.Column(db.Integer, primary_key=True)
+    actual_emotion = db.Column(db.String())
+    predicted_emotion = db.Column(db.String())
+    audio = db.Column(db.LargeBinary())
+    model = db.Column(db.String())
+
+    def __init__(self, actual_emotion, predicted_emotion, audio, model):
+        self.actual_emotion = actual_emotion
+        self.predicted_emotion = predicted_emotion
+        self.audio = audio
+        self.model = model
+
+    def json(self):
+        return {"actual_emotion": self.actual_emotion, "predicted_emotion": self.predicted_emotion, "audio": self.audio,
+                "model": self.model}
+
+
 def init_app(app):
     db.init_app(app)
     with app.app_context():
