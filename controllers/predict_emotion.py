@@ -7,7 +7,7 @@ from flask import request, jsonify, session
 from flask_restful import Resource
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from database import db, User
+from database import db, User, Recording
 
 from dotenv import load_dotenv
 import os
@@ -23,25 +23,13 @@ class EmotionView(Resource):
     def post(self):
         data = request.get_json()
 
-        self.__first_model.receive_recording(data['audio'], data['actualEmotion'])
+        result = self.__first_model.receive_recording(data['audio'], data['actualEmotion'])
 
+        new_recording = Recording(data['actualEmotion'], result, bytes(data['audio']), data['model'])
 
+        db.session.add(new_recording)
+        db.session.commit()
+        db.session.flush()
 
-        # user = db.session.query(User).filter(User.email == data['email']).first()
-        #
-        # if user is not None:
-        #     if check_password_hash(user.password, data['oldPassword']):
-        #         hashed_pw = generate_password_hash(data['newPassword'], "sha256")
-        #
-        #         user.password = hashed_pw
-        #         db.session.commit()
-        #         db.session.flush()
-        #
-        #         response = {'Message': 'Password changed successfully!'}
-        #         return jsonify(response)
-        #     else:
-        #         response = {'Message': 'Invalid password or email'}
-        #         return jsonify(response)
-        # else:
-        response = {'Message': 'tired!!!'}
+        response = {'Emotion': result}
         return jsonify(response)

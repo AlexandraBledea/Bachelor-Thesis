@@ -4,6 +4,7 @@ import io
 import wave
 
 import audioread
+import librosa
 import numpy as np
 import pandas as pd
 from keras.models import load_model
@@ -11,6 +12,8 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import StandardScaler
 import joblib
 import codecs
+
+from features.FeaturesExtraction import FeaturesExtraction
 
 
 class FirstModel:
@@ -35,85 +38,55 @@ class FirstModel:
 
     def receive_recording(self, recording, actual_label):
         byte_array = bytes(recording)
-        self.__save_temporary_file(byte_array)
 
+        self.__save_and_load_temporary_file(byte_array)
+        return self.__predict_emotion(actual_label)
 
+    def __save_and_load_temporary_file(self, byte_array):
+        with open('temp.wav', mode='wb') as f:
+            f.write(byte_array)
+    def __load_temporary_file(self):
+        signal, sample_rate = librosa.load('temp.wav')
+        return signal, sample_rate
 
-    def __save_temporary_file(self, bytes):
-        with open('bueno.wav', mode='wb') as f:
-            f.write(bytes)
+    def __get_features(self):
+        signal, sample_rate = self.__load_temporary_file()
 
+        result = FeaturesExtraction.extract_features(signal, sample_rate)
+        result = np.array(result)
 
+        return result
 
-        # # Create a BytesIO object from the byte array
-        # bytes_data = bytes_io.read()
-        #
-        # # audio parameters
-        # sample_rate = 44100
-        # num_channels = 1
-        # sample_width = 2  # for 16-bit sample width
-        #
-        # # convert byte array to numpy array
-        # audio_data = np.frombuffer(byte_array, dtype=np.int16)
-        #
-        # # create wave file
-        # with io.BytesIO() as wav_file:
-        #     with wave.open(wav_file, 'wb') as output_file:
-        #         output_file.setnchannels(num_channels)
-        #         output_file.setframerate(sample_rate)
-        #         output_file.setsampwidth(sample_width)
-        #         output_file.setnframes(len(audio_data) // num_channels)
-        #         output_file.setcomptype('NONE', 'not compressed')
-        #         output_file.writeframes(audio_data.tobytes())
-        #         frames = output_file.getnframes()
-        #         rate = output_file.getframerate()
-        #         duration = frames / float(rate)
-        #         print(duration)
-        #     # get wave file as bytes
-        #     wav_bytes = wav_file.getvalue()
-        #
-        # # write bytes to a file
-        # with open('output.wav', 'wb') as output_file:
-        #     output_file.write(wav_bytes)
-        #
+    def __process_features(self, actual_label):
+        x_predict = self.__get_features()
+        y_predict = actual_label
 
-        # with wave.open('audio.wav', 'wb') as wav_file:
-        #     wav_file.setnchannels(1)  # Set the number of channels (1 for mono, 2 for stereo)
-        #     wav_file.setsampwidth(2)  # Set the sample width (2 bytes for a 16-bit audio file)
-        #     wav_file.setframerate(44100)  # Set the sample rate (44100 Hz is the standard for audio CDs)
-        #     wav_file.writeframes(bytes_io.getbuffer())  # Write the audio data to the file
+        predicts = pd.DataFrame(x_predict)
+        predicts['labels'] = y_predict
+        x_predict = predicts.iloc[:, :-1].values
+        x_predict = np.array(x_predict)
+        x_predict = np.transpose(x_predict)
+        x_predict = self.__scaler.transform(x_predict)
+        x_predict = np.expand_dims(x_predict, axis=2)
 
-        # # Assuming 'bytes_array' is a byte array containing audio data
-        # with wave.open('audio3.wav', 'wb') as wav_file:
-        #     wav_file.setnchannels(1)  # Set the number of channels (1 for mono, 2 for stereo)
-        #     wav_file.setsampwidth(3)  # Set the sample width (2 bytes for a 16-bit audio file)
-        #     wav_file.setframerate(44100)  # Set the sample rate (44100 Hz is the standard for audio CDs)
-        #     wav_file.setcomptype('NONE', 'Not Compressed')
-        #     wav_file.setframerate(48)
-        #     wav_file.writeframes(byte_array)
+        return x_predict
 
-        # with open('audio.wav', 'rb') as f:
-        #     audio_data = f.read()
+    def __predict_emotion(self, actual_label):
 
-        # print(f"Duration: {duration:.2f} seconds")
+        x_predict = self.__process_features(actual_label)
 
-        # self.get_audio_format(bytes_data)
+        # We take the models prediction
+        prediction = self.__model.predict(x_predict)
 
-        # with contextlib.closing(wave.open(bytes_io, 'r')) as f:
-        #     frames = f.getnframes()
-        #     rate = f.getframerate()
-        #     duration = frames / float(rate)
-        #     print(duration)
-        # #
-        # df_predict = pd.DataFrame()
-        # df_predict['speech'] =
+        # We take the index of the greatest predicted probability
+        prediction_index = np.argmax(prediction)
 
-    def get_audio_format(self, data):
-        with data as f:
-            with audioread.audio_open(f) as audio_file:
-                return audio_file.format
+        # We convert the index to a one-hot encoder vector
+        prediction_index_2d = np.zeros_like(prediction)
+        prediction_index_2d[0][prediction_index] = 1
 
-        # Example usage
-        my_data = b'...'  # your byte array here
-        format = get_audio_format(my_data)
-        print(f"The audio format is {format}")
+        # Inverse transform the one-hot encoded vector to get the predicted label
+        prediction_label_enc = self.__encoder.inverse_transform(prediction_index_2d)
+        prediction_label = prediction_label_enc[0][0]
+
+        return prediction_label
