@@ -1,17 +1,9 @@
-import array
-import contextlib
-import io
-import wave
-
-import audioread
 import librosa
 import numpy as np
 import pandas as pd
 from keras.models import load_model
 from sklearn.preprocessing import OneHotEncoder
-from sklearn.preprocessing import StandardScaler
 import joblib
-import codecs
 
 from features.FeaturesExtraction import FeaturesExtraction
 
@@ -19,7 +11,7 @@ from features.FeaturesExtraction import FeaturesExtraction
 class FirstModel:
 
     def __init__(self):
-        self.__path = "C:\\Users\\night\\Desktop\\Facultate An 3\\Thesis\\EXPERIMENTS\\Model 1\\"
+        self.__path = "C:\\Users\\night\\Desktop\\Facultate An 3\\Thesis\\EXPERIMENTS\\Model 21\\"
         self.__model = load_model(self.__path + "training_model_experiment_x.h5")
         self.__encoder = self.__load_one_hot_encoder()
         self.__scaler = self.__load_standard_scaler()
@@ -43,10 +35,10 @@ class FirstModel:
         return self.__predict_emotion(actual_label)
 
     def __save_and_load_temporary_file(self, byte_array):
-        with open('temp.wav', mode='wb') as f:
+        with open(self.__path + 'temp.wav', mode='wb') as f:
             f.write(byte_array)
     def __load_temporary_file(self):
-        signal, sample_rate = librosa.load('temp.wav')
+        signal, sample_rate = librosa.load(self.__path + 'temp.wav')
         return signal, sample_rate
 
     def __get_features(self):

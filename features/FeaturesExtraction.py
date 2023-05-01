@@ -26,14 +26,28 @@ class FeaturesExtraction(object):
         return mfcc
 
     @staticmethod
+    def extract_f0(signal):
+        f0 = np.mean(librosa.yin(signal, fmin=librosa.note_to_hz('C2'), fmax=librosa.note_to_hz('C7')))
+        return f0
+
+    @staticmethod
     def extract_features(sig, sr):
         result = np.array([])
 
         # We are stacking the features horizontally
 
-        result = np.hstack((result, FeaturesExtraction.extract_ZCR(sig)))
-        result = np.hstack((result, FeaturesExtraction.extract_mel_spectrogram(sig, sr)))
-        result = np.hstack((result, FeaturesExtraction.extract_root_mean_square_value(sig)))
-        result = np.hstack((result, FeaturesExtraction.extract_mfcc(sig, sr)))
+        # result = np.hstack((result, FeaturesExtraction.extract_ZCR(sig)))
+        # result = np.hstack((result, FeaturesExtraction.extract_mel_spectrogram(sig, sr)))
+        # result = np.hstack((result, FeaturesExtraction.extract_root_mean_square_value(sig)))
+        zcr = FeaturesExtraction.extract_ZCR(sig)
+        mel_spectrogram = FeaturesExtraction.extract_mel_spectrogram(sig, sr)
+        # root_mean_square_value = extract_root_mean_square_value(sig)
+        mfcc = FeaturesExtraction.extract_mfcc(sig, sr)
+        f0 = FeaturesExtraction.extract_f0(sig)
+        result = np.hstack((result, zcr))
+        result = np.hstack((result, mel_spectrogram))
+        # result = np.hstack((result, root_mean_square_value))
+        result = np.hstack((result, f0))
+        result = np.hstack((result, mfcc))
 
         return result

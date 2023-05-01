@@ -13,6 +13,7 @@ from controllers.login import LoginView
 from controllers.change_password import ChangePasswordView
 from controllers.predict_emotion import EmotionView
 
+
 load_dotenv()
 
 app = Flask(__name__)
