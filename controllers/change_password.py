@@ -13,6 +13,8 @@ import os
 
 class ChangePasswordView(Resource):
 
+
+
     def put(self):
         data = request.get_json()
         user = db.session.query(User).filter(User.email == data['email']).first()

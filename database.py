@@ -35,16 +35,20 @@ class Recording(db.Model):
     predicted_emotion = db.Column(db.String())
     audio = db.Column(db.LargeBinary())
     model = db.Column(db.String())
+    email = db.Column(db.String())
+    statistics = db.Column(db.LargeBinary())
 
-    def __init__(self, actual_emotion, predicted_emotion, audio, model):
+    def __init__(self, actual_emotion, predicted_emotion, audio, model, email, statistics):
         self.actual_emotion = actual_emotion
         self.predicted_emotion = predicted_emotion
         self.audio = audio
         self.model = model
+        self.email = email
+        self.statistics = statistics
 
     def json(self):
         return {"actual_emotion": self.actual_emotion, "predicted_emotion": self.predicted_emotion, "audio": self.audio,
-                "model": self.model}
+                "model": self.model, "email": self.email, "statistics": self.statistics}
 
 
 def init_app(app):

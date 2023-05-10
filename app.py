@@ -4,15 +4,12 @@ import os
 from flask_migrate import Migrate
 from database import *
 from flask_restful import Api, Resource
-import jwt
-from datetime import datetime
 from flask_cors import CORS
 from functools import wraps
-from controllers.register import RegisterView
-from controllers.login import LoginView
-from controllers.change_password import ChangePasswordView
-from controllers.predict_emotion import EmotionView
 
+from werkzeug.security import check_password_hash, generate_password_hash
+from models.EnglishModel import FirstModel
+from service.service import Service
 
 load_dotenv()
 
@@ -26,6 +23,8 @@ db = init_app(app)
 api = Api(app)
 CORS(app)
 Migrate(app, db)
+service = Service(db)
+first_model = FirstModel()
 
 
 def token_required(f):
@@ -55,41 +54,97 @@ def token_required(f):
     return decorator
 
 
-class UserView(Resource):
-
-    @token_required
-    def get(self):
-        users = db.session.query(User).all()
-        return {'Users': list(x.json() for x in users)}
+# Wrapper function to apply the decorator to the resource
+def token_required_resource(resource):
+    resource.post = token_required(resource.post)
+    return resource
 
 
-@app.route('/unprotected')
-def unprotected():
-    return jsonify({'message': 'Anyone can view this!'})
-
-
-@app.route('/protected')
 @token_required
-def protected():
-    return jsonify({'message': 'This is only available for people with valid token!'})
+@app.route('/login/change-password', methods=['PUT'])
+def put_change_password():
+    data = request.get_json()
+    response = service.change_password(data)
+    return jsonify(response)
 
 
-@app.route('/')
-def home():
-    if not session.get('logged_in'):
-        return render_template('login.html')
-    else:
-        return 'Logged in currently!'
+@token_required
+@app.route('/login', methods=['POST'])
+def post_login():
+    data = request.get_json()
+    response = service.login(data)
+    if response['token'] != '':
+        session['logged_in'] = True
+        return jsonify(response)
 
-    return app
+    return jsonify(response)
 
 
-api.add_resource(UserView, '/users')
-api.add_resource(EmotionView, '/get-prediction')
-api.add_resource(RegisterView, '/register')
-api.add_resource(LoginView, '/login')
-api.add_resource(ChangePasswordView, '/login/change-password')
+@token_required
+@app.route('/register', methods=['POST'])
+def post_register():
+    data = request.get_json()
+    response = service.register_user(data)
+    return jsonify(response)
+
+
+@token_required
+@app.route('/get-prediction', methods=['POST'])
+def post_predict():
+    data = request.get_json()
+
+    result, bytes_plot = first_model.execute(data['audio'], data['actualEmotion'])
+
+    new_recording = Recording(data['actualEmotion'], result, bytes(data['audio']), data['model'], data['userEmail'],
+                              bytes_plot)
+
+    db.session.add(new_recording)
+    db.session.commit()
+    db.session.flush()
+
+    response = {'Emotion': result}
+    return jsonify(response)
+
+
+@token_required
+@app.route('/get-recodings', methods=['POST'])
+def post_get_recordings():
+    data = request.get_json()
+    result = service.get_recordings_for_user()
+    return jsonify(result)
+
 
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+# class UserView(Resource):
+#
+#     @token_required
+#     def get(self):
+#         users = db.session.query(User).all()
+#         return {'Users': list(x.json() for x in users)}
+#
+#
+# @app.route('/unprotected')
+# def unprotected():
+#     return jsonify({'message': 'Anyone can view this!'})
+#
+#
+# @app.route('/protected')
+# @token_required
+# def protected():
+#     return jsonify({'message': 'This is only available for people with valid token!'})
+#
+
+# @app.route('/')
+# def home():
+#     if not session.get('logged_in'):
+#         return render_template('login.html')
+#     else:
+#         return 'Logged in currently!'
+#
+#     return app
+
+
+

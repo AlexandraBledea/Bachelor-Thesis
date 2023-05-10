@@ -1,3 +1,5 @@
+from abc import ABC
+
 import librosa
 import numpy as np
 import pandas as pd
@@ -7,11 +9,13 @@ import joblib
 
 from features.FeaturesExtraction import FeaturesExtraction
 
+from models.Strategy import Strategy
 
-class FirstModel:
+
+class GermanModel(Strategy, ABC):
 
     def __init__(self):
-        self.__path = "C:\\Users\\night\\Desktop\\Facultate An 3\\Thesis\\EXPERIMENTS\\Model 21\\"
+        self.__path = "C:\\Users\\night\\Desktop\\Facultate An 3\\Thesis\\EXPERIMENTS\\Model 51 - TESS - No Augmentation - No Dropouts - CNN\\"
         self.__model = load_model(self.__path + "training_model_experiment_x.h5")
         self.__encoder = self.__load_one_hot_encoder()
         self.__scaler = self.__load_standard_scaler()
@@ -28,7 +32,7 @@ class FirstModel:
         scaler = joblib.load(self.__path + 'scaler.pk1')
         return scaler
 
-    def receive_recording(self, recording, actual_label):
+    def execute(self, recording, actual_label):
         byte_array = bytes(recording)
 
         self.__save_and_load_temporary_file(byte_array)
@@ -37,6 +41,7 @@ class FirstModel:
     def __save_and_load_temporary_file(self, byte_array):
         with open(self.__path + 'temp.wav', mode='wb') as f:
             f.write(byte_array)
+
     def __load_temporary_file(self):
         signal, sample_rate = librosa.load(self.__path + 'temp.wav')
         return signal, sample_rate
@@ -64,7 +69,6 @@ class FirstModel:
         return x_predict
 
     def __predict_emotion(self, actual_label):
-
         x_predict = self.__process_features(actual_label)
 
         # We take the models prediction

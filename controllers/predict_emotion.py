@@ -3,20 +3,20 @@ from flask_restful import Resource
 
 from database import db, Recording
 
-from models.FirstModel import FirstModel
+from models.EnglishModel import FirstModel
 
 
 class EmotionView(Resource):
 
-    def __init__(self):
+    def __init__(self, service):
         self.__first_model = FirstModel()
 
     def post(self):
         data = request.get_json()
 
-        result = self.__first_model.receive_recording(data['audio'], data['actualEmotion'])
+        result, bytes_plot = self.__first_model.execute(data['audio'], data['actualEmotion'])
 
-        new_recording = Recording(data['actualEmotion'], result, bytes(data['audio']), data['model'])
+        new_recording = Recording(data['actualEmotion'], result, bytes(data['audio']), data['model'], data['userEmail'], bytes_plot)
 
         db.session.add(new_recording)
         db.session.commit()

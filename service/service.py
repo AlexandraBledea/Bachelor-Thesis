@@ -1,87 +1,86 @@
 import pandas as pd
-from data_processing.language_based.english.tess_dataset import TessDataset
-from data_processing.language_based.english.savee_dataset import SaveeDataset
-from data_processing.language_based.english.ravdess_dataset import RavdessDataset
-from data_processing.language_based.english.cremad_dataset import CremaDDataset
-from data_processing.language_based.german.emo_dataset import EmoDataset
-
-
+from repository.repository import Repository
+from database import User, Recording
+from werkzeug.security import check_password_hash, generate_password_hash
+import jwt
+import os
+from datetime import datetime, timedelta
 class Service:
 
-    def __init__(self, repo):
-        self.__repository = repo
-        self.__data_frame = pd.DataFrame()
+    def __init__(self, database):
 
-    def initialize_repository(self, paths, labels):
-        self.add_paths_and_labels(paths, labels)
-
-    def add_paths_and_labels(self, paths, labels):
-        self.__repository.add_paths(paths)
-        self.__repository.add_labels(labels)
-
-    def create_data_frame(self):
-        self.__data_frame['speech'] = self.__repository.paths
-        self.__data_frame['label'] = self.__repository.add_labels
-
-    def initialize_german_database(self, dataset):
-        if dataset == "emo":
-            emo_db = EmoDataset("emo", "german")
-            self.init_emo(emo_db)
-
-    def initialize_english_database(self, dataset):
-
-        if dataset == "tess":
-            tess_db = TessDataset("tess", "english")
-            self.init_tess(tess_db)
-
-        elif dataset == "ravdess":
-            ravdess_db = RavdessDataset("ravdess", "english")
-            self.init_ravdess(ravdess_db)
-
-        elif dataset == "savee":
-            savee_db = SaveeDataset("savee", "english")
-            self.init_savee(savee_db)
-
-        elif dataset == "cremad":
-            cremad_db = CremaDDataset("cremad", "english")
-            self.init_cremad(cremad_db)
-
-        elif dataset == "all":
-            tess_db = TessDataset("tess", "english")
-            ravdess_db = RavdessDataset("ravdess", "english")
-            savee_db = SaveeDataset("savee", "english")
-            cremad_db = CremaDDataset("cremad", "english")
-
-            self.init_tess(tess_db)
-            self.init_ravdess(ravdess_db)
-            self.init_savee(savee_db)
-            self.init_cremad(cremad_db)
+        self.__repository = Repository(database)
 
 
-    def init_emo(self, emo_db):
-        paths, labels = emo_db.execute()
-        self.initialize_repository(paths, labels)
-    def init_savee(self, savee_db):
-        paths, labels = savee_db.execute()
-        self.initialize_repository(paths, labels)
+    def register_user(self, data):
+        user = self.__repository.find_user_by_email(data['email'])
 
-    def init_ravdess(self, ravdess_db):
-        paths, labels = ravdess_db.execute()
-        self.initialize_repository(paths, labels)
+        if user is None:
+            hashed_pw = generate_password_hash(data['password'], "sha256", salt_length=8)
 
-    def init_tess(self, tess_db):
-        paths, labels = tess_db.execute()
-        self.initialize_repository(paths, labels)
+            new_user = User(data['firstname'], data['lastname'], data['gender'], data['email'], hashed_pw)
+            self.__repository.add_user(new_user)
 
-    def init_cremad(self, cremad_db):
-        paths, labels = cremad_db.execute()
-        self.initialize_repository(paths, labels)
+            response = {'Message': 'Account created successfully!'}
+            return response
 
-    def paths(self):
-        return self.__repository.paths
+        else:
 
-    def labels(self):
-        return self.__repository.labels
+            response = {'Message': 'There exists an account with the given email!'}
+            return response
 
-    # def plot_data(self):
+    def change_password(self, data):
+
+        user = self.__repository.find_user_by_email(data['email'])
+
+        if user is not None:
+            if check_password_hash(user.password, data['oldPassword']):
+                hashed_pw = generate_password_hash(data['newPassword'], "sha256", salt_length=8)
+
+                self.__repository.change_password(user, hashed_pw)
+
+                response = {'Message': 'Password changed successfully!'}
+
+                return response
+
+            else:
+                response = {'Message': 'Invalid password or email'}
+                return response
+
+        else:
+            response = {'Message': 'Invalid password or email'}
+            return response
+
+    def login(self, data):
+
+        user = self.__repository.find_user_by_email(data['email'])
+
+        if user is not None:
+            if check_password_hash(user.password, data['password']):
+
+                token = jwt.encode({
+                    'email': data['email'],
+                    'expiration': str(datetime.utcnow() + timedelta(minutes=30))
+                },
+                    os.getenv("SECRET_KEY"),
+                    algorithm='HS256')
+
+                response = {'token': token}
+                return response
+
+
+        return {'token': ''}
+
+    def get_recordings_for_user(self, data):
+        user = self.__repository.find_user_by_email(data['email'])
+
+        if user is not None:
+
+            recordings = self.__repository.get_recordings_for_user(data['email'])
+
+            return recordings
+
+        else:
+
+            return {'Message': 'No user with the given email address'}
 
