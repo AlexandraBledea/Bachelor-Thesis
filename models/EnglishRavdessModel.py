@@ -88,9 +88,9 @@ class EnglishRavdessModel(Strategy, ABC):
 
         labels = self.__decode_labels(prediction)
 
-        plot_bytes = self.__plot_probabilities(prediction[0], labels)
+        percentages = [val * 100 for val in prediction[0]]
 
-        return prediction_label, plot_bytes
+        return prediction_label, percentages, labels
 
     def __decode_labels(self, prediction):
         labels = []
@@ -104,69 +104,3 @@ class EnglishRavdessModel(Strategy, ABC):
             labels.append(prediction_label)
 
         return labels
-
-    def __plot_probabilities(self, probabilities, labels):
-
-        colors = ['red', 'blue', 'green', 'yellow', 'orange', 'purple']
-
-        # Normalize the values
-        # total = sum(probabilities)
-        # probabilities = [val / total for val in probabilities]
-
-        # Convert probabilities to percentages
-        percentages = [val * 100 for val in probabilities]
-        # percentages = [x if x >= 1 else 0 for x in percentages]
-
-        for p in percentages:
-            print(p)
-
-        print(sum(percentages))
-
-        # Create the bar plot with percentages
-        plt.bar(labels, probabilities)
-
-
-        print(labels)
-        print(probabilities)
-
-        print(sum(probabilities))
-
-        # Set labels and title
-        plt.ylabel('Probabilities')
-        plt.xlabel('Emotions')
-        plt.title('Emotion Probabilities')
-
-        # plt.ylim(0, 100)  #
-        # plt.show()
-        # # Create explode list with the same length as probabilities
-        # explode = [0.3 if p == max(probabilities) else 0.1 for p in probabilities]
-        #
-        # # plotting the pie chart
-        # plt.bar(probabilities, labels=colors, colors=colors,
-        #         startangle=90, shadow=True, explode=(0.4, 0.4, 0.4, 0.4, 0.4, 0.4),
-        #         radius=1.2, autopct='%1.1f%%')
-
-        # # Set aspect ratio to be equal to have a circular pie chart
-        # plt.axis('equal')
-        # # Add more colors as needed
-        # plt.bar(labels, probabilities, color=colors[:len(labels)])
-
-        # plt.xscale('log')
-        # plt.yscale('log')
-        # Adjust the y-axis limits to ensure all bars are visible
-        # plt.ylim(0, max(probabilities) + max(probabilities) * 0.1)
-
-        # Rotate the x-axis labels if needed
-        # plt.xticks(rotation=45)
-
-        # Convert the plot to a byte array
-
-        plt.savefig("temp.png")
-
-        buf = io.BytesIO()
-        plt.savefig(buf, format='png')
-        buf.seek(0)
-        byte_array = buf.getvalue()
-        buf.close()
-
-        return byte_array
