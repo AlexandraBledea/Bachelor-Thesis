@@ -1,3 +1,7 @@
+import ast
+import base64
+import json
+
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
@@ -6,12 +10,17 @@ db = SQLAlchemy()
 class User(db.Model):
     __tablename__ = 'user'
 
+    __table_args__ = (
+        db.UniqueConstraint('email'),
+    )
+
     id = db.Column(db.Integer, primary_key=True)
     firstname = db.Column(db.String())
     lastname = db.Column(db.String())
     gender = db.Column(db.String())
     email = db.Column(db.String())
     password = db.Column(db.String())
+    recordings = db.relationship('Recording', backref='user')
 
     def __init__(self, firstname, lastname, gender, email, password):
         self.firstname = firstname
@@ -24,7 +33,9 @@ class User(db.Model):
         return f"<User {self.firstname, self.lastname, self.gender, self.email}>"
 
     def json(self):
-        return {"firstname": self.firstname, "lastname": self.lastname, "gender": self.gender, "email": self.email}
+        recordings_data = [recording.json() for recording in self.recordings]
+        return {"firstname": self.firstname, "lastname": self.lastname, "gender": self.gender, "email": self.email,
+                'recordings': recordings_data}
 
 
 class Recording(db.Model):
@@ -35,20 +46,33 @@ class Recording(db.Model):
     predicted_emotion = db.Column(db.String())
     audio = db.Column(db.LargeBinary())
     model = db.Column(db.String())
-    email = db.Column(db.String())
-    statistics = db.Column(db.LargeBinary())
+    email = db.Column(db.String(), db.ForeignKey('user.email'))
+    statistics_labels = db.Column(db.String())
+    statistics_percentages = db.Column(db.String())
 
-    def __init__(self, actual_emotion, predicted_emotion, audio, model, email, statistics):
+    def __init__(self, actual_emotion, predicted_emotion, audio, model, email, statistics_labels,
+                 statistics_percentages):
         self.actual_emotion = actual_emotion
         self.predicted_emotion = predicted_emotion
         self.audio = audio
         self.model = model
         self.email = email
-        self.statistics = statistics
+        self.statistics_labels = statistics_labels
+        self.statistics_percentages = statistics_percentages
 
     def json(self):
-        return {"actual_emotion": self.actual_emotion, "predicted_emotion": self.predicted_emotion, "audio": self.audio,
-                "model": self.model, "email": self.email, "statistics": self.statistics}
+        audio_numbers = [x for x in self.audio]
+
+        string = self.statistics_percentages.strip('{}')
+        statistics_percentages = [round(float(num), 2) for num in string.split(',')]
+
+        string = self.statistics_labels.strip('{}')
+        statistics_labels = string.split(',')
+
+        return {"email": self.email, "actualEmotion": self.actual_emotion, "predictedEmotion": self.predicted_emotion,
+                "audio": audio_numbers,
+                "model": self.model, "statistics_labels": statistics_labels,
+                "statistics_percentages": statistics_percentages}
 
 
 def init_app(app):

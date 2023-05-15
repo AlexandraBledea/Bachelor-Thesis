@@ -1,3 +1,4 @@
+from sqlalchemy.orm import joinedload
 from werkzeug.security import generate_password_hash
 
 from database import User, Recording
@@ -22,10 +23,32 @@ class Repository:
         self.__db.session.commit()
         self.__db.session.flush()
 
-    def get_recordings_for_user(self, email):
-        recordings = self.__db.session.query(Recording)
-        print(recordings)
-        return recordings
+    def add_recording(self, recording):
+        self.__db.session.add(recording)
+        self.__db.session.commit()
+        self.__db.session.flush()
+
+        self.__recordings.append(recording.json())
+
+    def initialize_recordings(self, email):
+        self.__recordings = []
+        user = self.find_user_by_email(email)
+        self.__recordings = user.json()['recordings']
+
+    def get_recordings(self):
+        return self.__recordings
+
+    # def get_recordings_for_user(self, email):
+    #     user = (
+    #         self.__db.session.query(User)
+    #         .options(joinedload(User.recordings))
+    #         .filter(User.email == email)
+    #         .first()
+    #     )
+    #
+    #     serialized_recordings = [recording.json() for recording in recordings]
+    #     print(serialized_recordings)
+    #     return serialized_recordings
 
     # @property
     # def paths(self):

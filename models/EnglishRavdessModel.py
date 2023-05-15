@@ -13,11 +13,11 @@ from features.FeaturesExtraction import FeaturesExtraction
 from models.Strategy import Strategy
 
 
-class FirstModel(Strategy, ABC):
+class EnglishRavdessModel(Strategy, ABC):
 
     def __init__(self):
-        self.__path = "C:\\Users\\night\\Desktop\\Facultate An 3\\Thesis\\EXPERIMENTS\\Model 40 - RAVDESS - No Augmentation - No Dropouts - Attention Based - adam optimizer\\"
-        self.__model = load_model(self.__path + "training_model_experiment_x.h5")
+        self.__path = "C:\\Users\\night\\Desktop\\Facultate An 3\\Thesis\\EXPERIMENTS\\RAVDESS EXPERIMENTS V3 - volume normalization\\ATTENTION BASED WITH BATCH NORMALIZATION\\"
+        self.__model = load_model(self.__path + "training_model_experiment_x1.h5")
         self.__encoder = self.__load_one_hot_encoder()
         self.__scaler = self.__load_standard_scaler()
 
@@ -50,7 +50,7 @@ class FirstModel(Strategy, ABC):
     def __get_features(self):
         signal, sample_rate = self.__load_temporary_file()
 
-        result = FeaturesExtraction.extract_features(signal, sample_rate)
+        result = FeaturesExtraction.extract_mfcc_features(signal, sample_rate)
         result = np.array(result)
 
         return result
@@ -115,17 +115,29 @@ class FirstModel(Strategy, ABC):
 
         # Convert probabilities to percentages
         percentages = [val * 100 for val in probabilities]
+        # percentages = [x if x >= 1 else 0 for x in percentages]
+
+        for p in percentages:
+            print(p)
+
+        print(sum(percentages))
 
         # Create the bar plot with percentages
-        plt.bar(labels, percentages, color=colors[:len(labels)])
+        plt.bar(labels, probabilities)
+
+
+        print(labels)
+        print(probabilities)
+
+        print(sum(probabilities))
 
         # Set labels and title
         plt.ylabel('Probabilities')
         plt.xlabel('Emotions')
         plt.title('Emotion Probabilities')
 
-        plt.ylim(0, 100)  #
-
+        # plt.ylim(0, 100)  #
+        # plt.show()
         # # Create explode list with the same length as probabilities
         # explode = [0.3 if p == max(probabilities) else 0.1 for p in probabilities]
         #
@@ -148,6 +160,9 @@ class FirstModel(Strategy, ABC):
         # plt.xticks(rotation=45)
 
         # Convert the plot to a byte array
+
+        plt.savefig("temp.png")
+
         buf = io.BytesIO()
         plt.savefig(buf, format='png')
         buf.seek(0)

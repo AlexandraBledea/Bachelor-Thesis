@@ -51,3 +51,14 @@ class FeaturesExtraction(object):
         result = np.hstack((result, mfcc))
 
         return result
+
+
+    @staticmethod
+    def extract_mfcc_features(sig, sr):
+        result = np.array([])
+
+        mfcc = FeaturesExtraction.extract_mfcc(sig, sr)
+
+        result = np.hstack((result, mfcc))
+
+        return result
