@@ -8,35 +8,55 @@ from datetime import datetime, timedelta
 from flask_jwt_extended import  create_access_token
 from models.Strategy import Strategy
 
+from models.EnglishTessModel import EnglishTessModel
+from models.EnglishRavdessModel import EnglishRavdessModel
+
 from models.EnglishModel import FirstModel
 class Service:
 
     strategy: Strategy
+
     def __init__(self, database):
         self.__repository = Repository(database)
+        self.__strategies = {}
+        self.__initialize_models()
 
-    def set_strategy(self, strategy: Strategy):
-        self.__strategy = strategy
+    def __initialize_models(self):
+        self.__strategies['English Tess'] = EnglishRavdessModel()
+        self.__strategies['English Ravdess'] = EnglishTessModel()
 
-    def predict_emotion(self, audio, actual_emotion):
-        return self.__strategy.execute(audio, actual_emotion)
+    def predict_emotion(self, strategy_name, audio, actual_emotion):
+        return self.__strategies[strategy_name].execute(audio, actual_emotion)
 
-    def add_recording(self, data, predicted_emotion, percentages, labels):
-        print(percentages)
-        print(labels)
+    def add_recording(self, actualEmotion, audio, model, email, predicted_emotion, statistics):
 
-        new_recording = Recording(data['actualEmotion'], predicted_emotion, bytes(data['audio']), data['model'], data['userEmail'],
-                                  labels, percentages)
+        new_recording = Recording(actualEmotion, predicted_emotion, bytes(audio), model, email,
+                                  str(statistics))
 
-        print(new_recording.statistics_percentages)
-        print(new_recording.statistics_labels)
 
         self.__repository.add_recording(new_recording)
 
         return new_recording
 
-    # def find_best_model(self, strategy1, strategy2):
+    def find_best_model(self, audio, actual_emotion):
 
+        final_predictions = []
+        final_percentages = []
+        final_statistics = []
+        strategy_name = []
+
+        for strategy in self.__strategies.values():
+            prediction, statistics = strategy.execute(audio, actual_emotion)
+
+            strategy_name.append(strategy.get_strategy_name())
+            final_predictions.append(prediction)
+            final_percentages.append(statistics[actual_emotion])
+            final_statistics.append(statistics)
+
+        index = final_percentages.index(max(final_percentages))
+        model_name = strategy_name[index]
+
+        return model_name, final_predictions[index], final_statistics[index]
 
 
     def register_user(self, data):

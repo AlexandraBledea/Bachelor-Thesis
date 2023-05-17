@@ -13,6 +13,7 @@ from controllers.predict_emotion_view_expert_user import EmotionViewExpert
 from controllers.register_view import RegisterView
 from controllers.recordings_view import RecordingsView
 from controllers.check_connection import CheckConnection
+from controllers.predict_emotion_view_simple_user import EmotionViewSimple
 
 from werkzeug.security import check_password_hash, generate_password_hash
 from models.EnglishModel import FirstModel
@@ -63,7 +64,14 @@ api.add_resource(RegisterView, '/register', resource_class_kwargs={
     'service': service
 })
 
-api.add_resource((EmotionViewExpert), '/get-prediction', resource_class_kwargs={
+api.add_resource((EmotionViewExpert), '/get-prediction-expert-user', resource_class_kwargs={
+    'service': service,
+    # 'first-model': first_model,
+    'english_tess_model': english_tess_model,
+    'english_ravdess_model': english_ravdess_model
+})
+
+api.add_resource((EmotionViewSimple), '/get-prediction-simple-user', resource_class_kwargs={
     'service': service,
     # 'first-model': first_model,
     'english_tess_model': english_tess_model,

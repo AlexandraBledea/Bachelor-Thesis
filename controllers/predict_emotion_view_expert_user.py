@@ -10,22 +10,15 @@ class EmotionViewExpert(Resource):
 
     def __init__(self, **kwargs):
         self.__service = kwargs['service']
-        self.__english_tess_model = kwargs['english_tess_model']
-        self.__english_ravdess_model = kwargs['english_ravdess_model']
+
 
     @jwt_required()
     def post(self):
         data = request.get_json()
 
-        print(data['model'])
+        result, statistics = self.__service.predict_emotion(data['model'], data['audio'], data['actualEmotion'])
 
-        if data['model'] == "English Tess":
-            self.__service.set_strategy(self.__english_tess_model)
-        elif data['model'] == "English Ravdess":
-            self.__service.set_strategy(self.__english_ravdess_model)
-
-        result, percentages, labels = self.__service.predict_emotion(data['audio'], data['actualEmotion'])
-
-        recording = self.__service.add_recording(data, result, percentages, labels).json()
+        recording = self.__service.add_recording(data['actualEmotion'], data['audio'], data['model'],
+                                                 data['userEmail'], result.capitalize(), statistics).json()
 
         return jsonify(recording)

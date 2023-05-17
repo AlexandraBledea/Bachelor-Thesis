@@ -19,7 +19,7 @@ class User(db.Model):
     lastname = db.Column(db.String())
     gender = db.Column(db.String())
     email = db.Column(db.String())
-    password = db.Column(db.String())
+    __password = db.Column(db.String())
     recordings = db.relationship('Recording', backref='user')
 
     def __init__(self, firstname, lastname, gender, email, password):
@@ -27,7 +27,7 @@ class User(db.Model):
         self.lastname = lastname
         self.gender = gender
         self.email = email
-        self.password = password
+        self.__password = password
 
     def __repr__(self):
         return f"<User {self.firstname, self.lastname, self.gender, self.email}>"
@@ -47,32 +47,28 @@ class Recording(db.Model):
     audio = db.Column(db.LargeBinary())
     model = db.Column(db.String())
     email = db.Column(db.String(), db.ForeignKey('user.email'))
-    statistics_labels = db.Column(db.String())
-    statistics_percentages = db.Column(db.String())
+    statistics = db.Column(db.String())
 
-    def __init__(self, actual_emotion, predicted_emotion, audio, model, email, statistics_labels,
-                 statistics_percentages):
+    def __init__(self, actual_emotion, predicted_emotion, audio, model, email, statistics):
         self.actual_emotion = actual_emotion
         self.predicted_emotion = predicted_emotion
         self.audio = audio
         self.model = model
         self.email = email
-        self.statistics_labels = statistics_labels
-        self.statistics_percentages = statistics_percentages
+        self.statistics = statistics
 
     def json(self):
         audio_numbers = [x for x in self.audio]
 
-        string = self.statistics_percentages.strip('{}')
-        statistics_percentages = [round(float(num), 2) for num in string.split(',')]
-
-        string = self.statistics_labels.strip('{}')
-        statistics_labels = string.split(',')
+        # string = self.statistics_percentages.strip('{}')
+        # statistics_percentages = [round(float(num), 2) for num in string.split(',')]
+        #
+        # string = self.statistics_labels.strip('{}')
+        # statistics_labels = string.split(',')
 
         return {"email": self.email, "actualEmotion": self.actual_emotion, "predictedEmotion": self.predicted_emotion,
                 "audio": audio_numbers,
-                "model": self.model, "statistics_labels": statistics_labels,
-                "statistics_percentages": statistics_percentages}
+                "model": self.model, "statistics": eval(self.statistics)}
 
 
 def init_app(app):

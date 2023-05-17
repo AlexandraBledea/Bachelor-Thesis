@@ -29,6 +29,9 @@ class FirstModel(Strategy, ABC):
 
         return enc
 
+    def get_strategy_name(self):
+        return "First Model"
+
     def __load_standard_scaler(self):
         scaler = joblib.load(self.__path + 'scaler.pk1')
         return scaler

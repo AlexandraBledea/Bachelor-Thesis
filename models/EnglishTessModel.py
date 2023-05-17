@@ -39,12 +39,17 @@ class EnglishTessModel(Strategy, ABC):
         self.__save_and_load_temporary_file(byte_array)
         return self.__predict_emotion(actual_label)
 
+    def get_strategy_name(self):
+        return "English Tess"
+
     def __save_and_load_temporary_file(self, byte_array):
         with open(self.__path + 'temp.wav', mode='wb') as f:
             f.write(byte_array)
 
     def __load_temporary_file(self):
         signal, sample_rate = librosa.load(self.__path + 'temp.wav')
+        print(type(signal))
+        print(type(sample_rate))
         return signal, sample_rate
 
     def __get_features(self):
@@ -87,10 +92,14 @@ class EnglishTessModel(Strategy, ABC):
         prediction_label = prediction_label_enc[0][0]
 
         labels = self.__decode_labels(prediction)
+        percentages = [round(val * 100, 2) for val in prediction[0]]
+        res = {}
 
-        percentages = [val * 100 for val in prediction[0]]
+        for index in range(0, len(labels)):
+            labels[index] = labels[index].capitalize()
+            res[labels[index]] = percentages[index]
 
-        return prediction_label, percentages, labels
+        return prediction_label, res
 
     def __decode_labels(self, prediction):
         labels = []

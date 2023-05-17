@@ -39,6 +39,9 @@ class EnglishRavdessModel(Strategy, ABC):
         self.__save_and_load_temporary_file(byte_array)
         return self.__predict_emotion(actual_label)
 
+    def get_strategy_name(self):
+        return "English Ravdess"
+
     def __save_and_load_temporary_file(self, byte_array):
         with open(self.__path + 'temp.wav', mode='wb') as f:
             f.write(byte_array)
@@ -60,7 +63,7 @@ class EnglishRavdessModel(Strategy, ABC):
         y_predict = actual_label
 
         predicts = pd.DataFrame(x_predict)
-        predicts['labels'] = y_predict
+        predicts['labels'] = actual_label
         x_predict = predicts.iloc[:, :-1].values
         x_predict = np.array(x_predict)
         x_predict = np.transpose(x_predict)
@@ -86,11 +89,16 @@ class EnglishRavdessModel(Strategy, ABC):
         prediction_label_enc = self.__encoder.inverse_transform(prediction_index_2d)
         prediction_label = prediction_label_enc[0][0]
 
+
         labels = self.__decode_labels(prediction)
+        percentages = [round(val * 100, 2) for val in prediction[0]]
+        res = {}
 
-        percentages = [val * 100 for val in prediction[0]]
+        for index in range(0, len(labels)):
+            labels[index] = labels[index].capitalize()
+            res[labels[index]] = percentages[index]
 
-        return prediction_label, percentages, labels
+        return prediction_label, res
 
     def __decode_labels(self, prediction):
         labels = []

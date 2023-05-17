@@ -10,22 +10,15 @@ class EmotionViewSimple(Resource):
 
     def __init__(self, **kwargs):
         self.__service = kwargs['service']
-        self.__english_tess_model = kwargs['english_tess_model']
-        self.__english_ravdess_model = kwargs['english_ravdess_model']
 
     @jwt_required()
     def post(self):
         data = request.get_json()
 
-        print(data['model'])
+        model_name, prediction, statistics = self.__service.find_best_model(data['audio'], data['actualEmotion'])
 
-        if data['model'] == "English Tess":
-            self.__service.set_strategy(self.__english_tess_model)
-        elif data['model'] == "English Ravdess":
-            self.__service.set_strategy(self.__english_ravdess_model)
+        recording = self.__service.add_recording(data['actualEmotion'], data['audio'], model_name,
+                                                 data['userEmail'], prediction.capitalize(), statistics).json()
 
-        result, bytes_plot = self.__service.predict_emotion(data['audio'], data['actualEmotion'])
-
-        recording = self.__service.add_recording(data, result, bytes_plot).json()
 
         return jsonify(recording)
