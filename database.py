@@ -19,7 +19,7 @@ class User(db.Model):
     lastname = db.Column(db.String())
     gender = db.Column(db.String())
     email = db.Column(db.String())
-    __password = db.Column(db.String())
+    password = db.Column(db.String())
     recordings = db.relationship('Recording', backref='user')
 
     def __init__(self, firstname, lastname, gender, email, password):
@@ -27,7 +27,7 @@ class User(db.Model):
         self.lastname = lastname
         self.gender = gender
         self.email = email
-        self.__password = password
+        self.password = password
 
     def __repr__(self):
         return f"<User {self.firstname, self.lastname, self.gender, self.email}>"
