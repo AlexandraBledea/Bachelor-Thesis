@@ -16,6 +16,8 @@ class EmotionViewExpert(Resource):
     def post(self):
         data = request.get_json()
 
+        print(data['model'])
+
         result, statistics = self.__service.predict_emotion(data['model'], data['audio'], data['actualEmotion'])
 
         recording = self.__service.add_recording(data['actualEmotion'], data['audio'], data['model'],

@@ -10,6 +10,7 @@ from models.Strategy import Strategy
 
 from models.EnglishTessModel import EnglishTessModel
 from models.EnglishRavdessModel import EnglishRavdessModel
+from models.EnglishRavdessModel2 import EnglishRavdessModel2
 
 from models.EnglishModel import FirstModel
 class Service:
@@ -22,8 +23,8 @@ class Service:
         self.__initialize_models()
 
     def __initialize_models(self):
-        self.__strategies['English Tess'] = EnglishRavdessModel()
-        self.__strategies['English Ravdess'] = EnglishTessModel()
+        self.__strategies['English Tess'] = EnglishRavdessModel2()
+        self.__strategies['English Ravdess'] = EnglishRavdessModel()
 
     def predict_emotion(self, strategy_name, audio, actual_emotion):
         return self.__strategies[strategy_name].execute(audio, actual_emotion)

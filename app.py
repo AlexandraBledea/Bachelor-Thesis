@@ -19,6 +19,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from models.EnglishModel import FirstModel
 from service.service import Service
 from models.EnglishTessModel import EnglishTessModel
+from models.EnglishTessModel2D import EnglishTessModel2D
 from models.EnglishRavdessModel import EnglishRavdessModel
 
 from flask_jwt_extended import JWTManager

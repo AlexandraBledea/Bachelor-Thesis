@@ -13,11 +13,11 @@ from features.FeaturesExtraction import FeaturesExtraction
 from models.Strategy import Strategy
 
 
-class EnglishRavdessModel(Strategy, ABC):
+class EnglishRavdessModel2(Strategy, ABC):
 
     def __init__(self):
         # self.__path = "C:\\Users\\night\\Desktop\\Facultate An 3\\Thesis\\EXPERIMENTS\\RAVDESS EXPERIMENTS V3 - volume normalization\\ATTENTION BASED WITH BATCH NORMALZIATION MODIFIED LEARNING RATE\\"
-        self.__path = "C:\\Users\\night\\Desktop\\Facultate An 3\\Thesis Experiments\\RAVDESS\\23\\"
+        self.__path = "C:\\Users\\night\\Desktop\\Facultate An 3\\Thesis Experiments\\RAVDESS\\20\\"
 
         self.__model = load_model(self.__path + "training_model_experiment_x.h5")
         self.__encoder = self.__load_one_hot_encoder()
@@ -47,6 +47,7 @@ class EnglishRavdessModel(Strategy, ABC):
         self.__save_and_load_temporary_file(byte_array)
         signal, sample_rate = self.__load_temporary_file()
         self.preprocess(signal)
+
         return self.__predict_emotion(actual_label)
 
     def get_strategy_name(self):
@@ -63,7 +64,7 @@ class EnglishRavdessModel(Strategy, ABC):
     def __get_features(self):
         signal, sample_rate = self.__load_temporary_file()
 
-        result = FeaturesExtraction.extract_mel_spect_pitch_dev(signal, sample_rate)
+        result = FeaturesExtraction.extract_mel_spectrogram(signal, sample_rate)
         result = np.array(result)
 
         return result

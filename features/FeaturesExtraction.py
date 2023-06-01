@@ -62,3 +62,49 @@ class FeaturesExtraction(object):
         result = np.hstack((result, mfcc))
 
         return result
+
+    @staticmethod
+    def extract_pitch_standard_deviation(signal, sample_rate):
+        pitch_, _ = librosa.core.piptrack(y=signal, sr=sample_rate)
+        pitch_dev = np.std(pitch_, axis=0)
+
+        return pitch_dev.mean()
+
+    @staticmethod
+    def extract_mel_spect_pitch_dev(sig, sr):
+        result = np.array([])
+
+        pitch_dev = FeaturesExtraction.extract_pitch_standard_deviation(sig, sr)
+        mel_spect = FeaturesExtraction.extract_mel_spectrogram(sig, sr)
+
+        result = np.hstack((result, mel_spect))
+        result = np.hstack((result, pitch_dev))
+
+        return result
+
+    @staticmethod
+    def normalize_volume(signal):
+        max_amplitude = np.max(np.abs(signal))
+
+        scale = 0.5 / max_amplitude
+
+        signal = signal * scale
+
+        return signal
+
+    @staticmethod
+    def trim_silence(signal, threshold=30):
+        # Trim leading and trailing silence
+        trimmed_signal, _ = librosa.effects.trim(signal, top_db=threshold)
+
+        return trimmed_signal
+
+    @staticmethod
+    def extract_mel_spect_features(sig, sr):
+        result = np.array([])
+
+        mel_spect = FeaturesExtraction.extract_mel_spectrogram(sig, sr)
+
+        result = np.hstack((result, mel_spect))
+
+        return result
