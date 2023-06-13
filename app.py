@@ -6,6 +6,7 @@ from database import *
 from flask_restful import Api, Resource
 from flask_cors import CORS
 from functools import wraps
+from jwt.exceptions import ExpiredSignatureError
 
 from controllers.change_password_view import ChangePasswordView
 from controllers.login_view import  LoginView
@@ -48,6 +49,7 @@ english_ravdess_model = EnglishRavdessModel()
 app.config["JWT_TOKEN_LOCATION"] = ["headers"]
 app.config["JWT_HEADER_NAME"] = "Authorization"
 app.config["JWT_HEADER_TYPE"] = "Bearer"
+app.config['PROPAGATE_EXCEPTIONS'] = True
 # app.config["JWT_REQUIRED_CLAIMS"] = []
 
 

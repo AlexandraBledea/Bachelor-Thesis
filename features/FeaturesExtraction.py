@@ -6,23 +6,52 @@ class FeaturesExtraction(object):
 
     @staticmethod
     def extract_ZCR(signal):
-        zcr = np.mean(librosa.feature.zero_crossing_rate(y=signal).T, axis=0)
+        zcr = np.mean(librosa.effects.feature.zero_crossing_rate(y=signal).T, axis=0)
         return zcr
 
     @staticmethod
     def extract_root_mean_square_value(signal):
-        rms = np.mean(librosa.feature.rms(y=signal).T, axis=0)
+        rms = np.mean(librosa.effects.feature.rms(y=signal).T, axis=0)
         return rms
 
     @staticmethod
     def extract_mel_spectrogram(signal, sample_rate):
-        mel = np.mean(librosa.feature.melspectrogram(y=signal, sr=sample_rate).T, axis=0)
+        mel = np.mean(librosa.effects.feature.melspectrogram(y=signal, sr=sample_rate).T, axis=0)
         return mel
+
+    @staticmethod
+    def extract_mel_spectrogram_multi_time_steps(signal, sample_rate):
+        mel = librosa.effects.feature.melspectrogram(y=signal, sr=sample_rate)
+        return mel.transpose()
+
+    @staticmethod
+    def extract_mfcc_multi_time_steps(signal, sample_rate):
+        mfcc = librosa.effects.feature.mfcc(y=signal, sr=sample_rate, n_mfcc=40)
+        return mfcc.transpose()
+
+    @staticmethod
+    def extract_mel_mfcc_multi_time_steps(sig, sr):
+        mfcc = FeaturesExtraction.extract_mfcc_multi_time_steps(sig, sr)
+        spec = FeaturesExtraction.extract_mel_spectrogram_multi_time_steps(sig, sr)
+
+        result = np.concatenate((spec, mfcc), axis=1)
+
+        return result
+
+    @staticmethod
+    def pad_audio(signal):
+        length_diff = 221184 - len(signal)
+        if length_diff > 0:
+            audio = np.pad(signal, (0, length_diff), mode='constant')
+
+            return audio
+
+        return signal
 
     @staticmethod
     def extract_mfcc(signal, sample_rate):
         # signal, sample_rate = librosa.load(file_name, duration=3, offset=0.5)
-        mfcc = np.mean(librosa.feature.mfcc(y=signal, sr=sample_rate, n_mfcc=40).T, axis=0)
+        mfcc = np.mean(librosa.effects.feature.mfcc(y=signal, sr=sample_rate, n_mfcc=40).T, axis=0)
         return mfcc
 
     @staticmethod
@@ -52,6 +81,15 @@ class FeaturesExtraction(object):
 
         return result
 
+    @staticmethod
+    def extract_mel_spect_and_mfcc_features(sig, sr):
+        result = np.array([])
+
+        mel_spect = FeaturesExtraction.extract_mel_spectrogram(sig, sr)
+        mfcc = FeaturesExtraction.extract_mfcc(sig, sr)
+        result = np.hstack((result, mel_spect))
+        result = np.hstack((result, mfcc))
+        return result
 
     @staticmethod
     def extract_mfcc_features(sig, sr):

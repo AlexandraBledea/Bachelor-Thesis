@@ -11,8 +11,15 @@ from models.Strategy import Strategy
 from models.EnglishTessModel import EnglishTessModel
 from models.EnglishRavdessModel import EnglishRavdessModel
 from models.EnglishRavdessModel2 import EnglishRavdessModel2
+from models.EnglishRavdessModel3 import EnglishRavdessModel3
 
 from models.EnglishModel import FirstModel
+from models.EnglishRavdessAlexandra import EnglishRavdessAlexandra
+from models.EnglishRavdessAlexandra2 import EnglishRavdessAlexandra2
+from models.EnglishRavdessModelBunCorect import EnglishRavdessModelBunCorect
+from models.EnglishRavdessAlexandraDATASET import EnglishRavdessAlexandraDATASET
+from models.EnglishRavdessAlexandraDATASET2 import EnglishRavdessAlexandraDATASET2
+from models.EnglishRavdessAlexandraDATASET_Multi_Feature import EnglishRavdessAlexandraDATASET_Multi_Feature
 class Service:
 
     strategy: Strategy
@@ -23,8 +30,8 @@ class Service:
         self.__initialize_models()
 
     def __initialize_models(self):
-        self.__strategies['English Tess'] = EnglishRavdessModel2()
-        self.__strategies['English Ravdess'] = EnglishRavdessModel()
+        self.__strategies['English Tess'] = EnglishRavdessAlexandraDATASET_Multi_Feature()
+        self.__strategies['English Ravdess'] = EnglishRavdessAlexandraDATASET()
 
     def predict_emotion(self, strategy_name, audio, actual_emotion):
         return self.__strategies[strategy_name].execute(audio, actual_emotion)
@@ -107,16 +114,9 @@ class Service:
 
         if user is not None:
             if check_password_hash(user.password, data['password']):
+                expiration_time = timedelta(minutes=60)
+                token = create_access_token(identity=data['email'], expires_delta=expiration_time)
 
-                token = create_access_token(
-                    identity=data['email'])
-
-                # token = jwt.encode({
-                #     'email': data['email'],
-                #     'expiration': str(datetime.utcnow() + timedelta(minutes=30))
-                # },
-                #     os.getenv("SECRET_KEY"),
-                #     algorithm='HS256')
 
                 self.__repository.initialize_recordings(data['email'])
 
