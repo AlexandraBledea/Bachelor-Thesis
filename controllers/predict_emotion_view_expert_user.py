@@ -11,14 +11,13 @@ class EmotionViewExpert(Resource):
     def __init__(self, **kwargs):
         self.__service = kwargs['service']
 
-
     @jwt_required()
     def post(self):
         data = request.get_json()
 
         print(data['model'])
 
-        result, statistics = self.__service.predict_emotion(data['model'], data['audio'], data['actualEmotion'])
+        result, statistics = self.__service.predict_emotion(data['model'], data['audio'])
 
         recording = self.__service.add_recording(data['actualEmotion'], data['audio'], data['model'],
                                                  data['userEmail'], result.capitalize(), statistics).json()

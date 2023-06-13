@@ -13,15 +13,11 @@ from controllers.login_view import  LoginView
 from controllers.predict_emotion_view_expert_user import EmotionViewExpert
 from controllers.register_view import RegisterView
 from controllers.recordings_view import RecordingsView
-from controllers.check_connection import CheckConnection
 from controllers.predict_emotion_view_simple_user import EmotionViewSimple
 
 from werkzeug.security import check_password_hash, generate_password_hash
-from models.EnglishModel import FirstModel
 from service.service import Service
-from models.EnglishTessModel import EnglishTessModel
-from models.EnglishTessModel2D import EnglishTessModel2D
-from models.EnglishRavdessModel import EnglishRavdessModel
+
 
 from flask_jwt_extended import JWTManager
 
@@ -34,26 +30,18 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://' + os.getenv("DB_USER") +
                                         os.getenv("DB_HOST") + '/' + os.getenv("DB_NAME")
 
 
-
-# config_app(app, "flask_config.ini")
 db = init_app(app)
 jwt = JWTManager(app)
 Migrate(app, db)
 CORS(app)
 api = Api(app)
 service = Service(db)
-first_model = FirstModel()
-english_tess_model = EnglishTessModel()
-english_ravdess_model = EnglishRavdessModel()
 
 app.config["JWT_TOKEN_LOCATION"] = ["headers"]
 app.config["JWT_HEADER_NAME"] = "Authorization"
 app.config["JWT_HEADER_TYPE"] = "Bearer"
 app.config['PROPAGATE_EXCEPTIONS'] = True
-# app.config["JWT_REQUIRED_CLAIMS"] = []
 
-
-api.add_resource(CheckConnection, '/check-connection')
 
 api.add_resource(LoginView, '/login', resource_class_kwargs={
     'service': service
@@ -69,16 +57,10 @@ api.add_resource(RegisterView, '/register', resource_class_kwargs={
 
 api.add_resource((EmotionViewExpert), '/get-prediction-expert-user', resource_class_kwargs={
     'service': service,
-    # 'first-model': first_model,
-    'english_tess_model': english_tess_model,
-    'english_ravdess_model': english_ravdess_model
 })
 
 api.add_resource((EmotionViewSimple), '/get-prediction-simple-user', resource_class_kwargs={
     'service': service,
-    # 'first-model': first_model,
-    'english_tess_model': english_tess_model,
-    'english_ravdess_model': english_ravdess_model
 })
 
 api.add_resource((RecordingsView), '/recordings', resource_class_kwargs = {

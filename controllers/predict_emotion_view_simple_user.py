@@ -15,10 +15,9 @@ class EmotionViewSimple(Resource):
     def post(self):
         data = request.get_json()
 
-        model_name, prediction, statistics = self.__service.find_best_model(data['audio'], data['actualEmotion'])
+        model_name, prediction = self.__service.find_best_model(data['audio'])
 
         recording = self.__service.add_recording(data['actualEmotion'], data['audio'], model_name,
-                                                 data['userEmail'], prediction.capitalize(), statistics).json()
-
+                                                 data['userEmail'], prediction.capitalize(), []).json()
 
         return jsonify(recording)

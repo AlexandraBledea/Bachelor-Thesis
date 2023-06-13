@@ -2,20 +2,15 @@ import librosa
 import numpy as np
 
 
-class FeaturesExtraction(object):
+class DataProcessing(object):
 
     @staticmethod
-    def extract_ZCR(signal):
-        zcr = np.mean(librosa.effects.feature.zero_crossing_rate(y=signal).T, axis=0)
-        return zcr
+    def extract_mfcc_mean(signal, sample_rate):
+        mfcc = np.mean(librosa.effects.feature.mfcc(y=signal, sr=sample_rate, n_mfcc=40).T, axis=0)
+        return mfcc
 
     @staticmethod
-    def extract_root_mean_square_value(signal):
-        rms = np.mean(librosa.effects.feature.rms(y=signal).T, axis=0)
-        return rms
-
-    @staticmethod
-    def extract_mel_spectrogram(signal, sample_rate):
+    def extract_mel_spectrogram_mean(signal, sample_rate):
         mel = np.mean(librosa.effects.feature.melspectrogram(y=signal, sr=sample_rate).T, axis=0)
         return mel
 
@@ -30,95 +25,69 @@ class FeaturesExtraction(object):
         return mfcc.transpose()
 
     @staticmethod
-    def extract_mel_mfcc_multi_time_steps(sig, sr):
-        mfcc = FeaturesExtraction.extract_mfcc_multi_time_steps(sig, sr)
-        spec = FeaturesExtraction.extract_mel_spectrogram_multi_time_steps(sig, sr)
+    def extract_mel_spect_and_mfcc_mean(sig, sr):
 
+        result = np.array([])
+        mel_spect = DataProcessing.extract_mel_spectrogram_mean(sig, sr)
+        mfcc = DataProcessing.extract_mfcc_mean(sig, sr)
+        result = np.hstack((result, mel_spect))
+        result = np.hstack((result, mfcc))
+
+        return result
+
+    @staticmethod
+    def extract_mel_mfcc_multi_time_steps(sig, sr):
+
+        mfcc = DataProcessing.extract_mfcc_multi_time_steps(sig, sr)
+        spec = DataProcessing.extract_mel_spectrogram_multi_time_steps(sig, sr)
         result = np.concatenate((spec, mfcc), axis=1)
 
         return result
 
     @staticmethod
-    def pad_audio(signal):
+    def extract_mfcc_features(sig, sr):
+
+        result = np.array([])
+        mfcc = DataProcessing.extract_mfcc_mean(sig, sr)
+        result = np.hstack((result, mfcc))
+
+        return result
+
+    @staticmethod
+    def extract_mel_spect_features(sig, sr):
+        result = np.array([])
+        mel_spect = DataProcessing.extract_mel_spectrogram_mean(sig, sr)
+        result = np.hstack((result, mel_spect))
+
+        return result
+
+    @staticmethod
+    def pad_audio_alexandra(signal):
         length_diff = 221184 - len(signal)
         if length_diff > 0:
             audio = np.pad(signal, (0, length_diff), mode='constant')
-
             return audio
+
+        elif length_diff < 0:
+
+            cut_audio = signal[0:221184]
+            return cut_audio
 
         return signal
 
     @staticmethod
-    def extract_mfcc(signal, sample_rate):
-        # signal, sample_rate = librosa.load(file_name, duration=3, offset=0.5)
-        mfcc = np.mean(librosa.effects.feature.mfcc(y=signal, sr=sample_rate, n_mfcc=40).T, axis=0)
-        return mfcc
+    def pad_audio_ravdess(signal):
+        length_diff = 253053 - len(signal)
+        if length_diff > 0:
+            audio = np.pad(signal, (0, length_diff), mode='constant')
+            return audio
 
-    @staticmethod
-    def extract_f0(signal):
-        f0 = np.mean(librosa.yin(signal, fmin=librosa.note_to_hz('C2'), fmax=librosa.note_to_hz('C7')))
-        return f0
+        elif length_diff < 0:
 
-    @staticmethod
-    def extract_features(sig, sr):
-        result = np.array([])
+            cut_audio = signal[0:253053]
+            return cut_audio
 
-        # We are stacking the features horizontally
-
-        # result = np.hstack((result, FeaturesExtraction.extract_ZCR(sig)))
-        # result = np.hstack((result, FeaturesExtraction.extract_mel_spectrogram(sig, sr)))
-        # result = np.hstack((result, FeaturesExtraction.extract_root_mean_square_value(sig)))
-        zcr = FeaturesExtraction.extract_ZCR(sig)
-        mel_spectrogram = FeaturesExtraction.extract_mel_spectrogram(sig, sr)
-        # root_mean_square_value = extract_root_mean_square_value(sig)
-        mfcc = FeaturesExtraction.extract_mfcc(sig, sr)
-        f0 = FeaturesExtraction.extract_f0(sig)
-        result = np.hstack((result, zcr))
-        result = np.hstack((result, mel_spectrogram))
-        # result = np.hstack((result, root_mean_square_value))
-        result = np.hstack((result, f0))
-        result = np.hstack((result, mfcc))
-
-        return result
-
-    @staticmethod
-    def extract_mel_spect_and_mfcc_features(sig, sr):
-        result = np.array([])
-
-        mel_spect = FeaturesExtraction.extract_mel_spectrogram(sig, sr)
-        mfcc = FeaturesExtraction.extract_mfcc(sig, sr)
-        result = np.hstack((result, mel_spect))
-        result = np.hstack((result, mfcc))
-        return result
-
-    @staticmethod
-    def extract_mfcc_features(sig, sr):
-        result = np.array([])
-
-        mfcc = FeaturesExtraction.extract_mfcc(sig, sr)
-
-        result = np.hstack((result, mfcc))
-
-        return result
-
-    @staticmethod
-    def extract_pitch_standard_deviation(signal, sample_rate):
-        pitch_, _ = librosa.core.piptrack(y=signal, sr=sample_rate)
-        pitch_dev = np.std(pitch_, axis=0)
-
-        return pitch_dev.mean()
-
-    @staticmethod
-    def extract_mel_spect_pitch_dev(sig, sr):
-        result = np.array([])
-
-        pitch_dev = FeaturesExtraction.extract_pitch_standard_deviation(sig, sr)
-        mel_spect = FeaturesExtraction.extract_mel_spectrogram(sig, sr)
-
-        result = np.hstack((result, mel_spect))
-        result = np.hstack((result, pitch_dev))
-
-        return result
+        return signal
 
     @staticmethod
     def normalize_volume(signal):
@@ -132,17 +101,31 @@ class FeaturesExtraction(object):
 
     @staticmethod
     def trim_silence(signal, threshold=30):
-        # Trim leading and trailing silence
         trimmed_signal, _ = librosa.effects.trim(signal, top_db=threshold)
 
         return trimmed_signal
 
     @staticmethod
-    def extract_mel_spect_features(sig, sr):
-        result = np.array([])
+    def decode_labels(prediction, encoder):
+        labels = []
 
-        mel_spect = FeaturesExtraction.extract_mel_spectrogram(sig, sr)
+        for index in range(0, len(prediction[0])):
+            prediction_index_2d = np.zeros_like(prediction)
+            prediction_index_2d[0][index] = 1
+            prediction_label_enc = encoder.inverse_transform(prediction_index_2d)
+            prediction_label = prediction_label_enc[0][0]
 
-        result = np.hstack((result, mel_spect))
+            labels.append(prediction_label)
 
-        return result
+        return labels
+
+    @staticmethod
+    def create_percentages_for_emotions(labels, prediction):
+        percentages = [round(val * 100, 2) for val in prediction]
+
+        res = {}
+        for index in range(0, len(labels)):
+            labels[index] = labels[index].capitalize()
+            res[labels[index]] = percentages[index]
+
+        return res

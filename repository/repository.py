@@ -37,39 +37,3 @@ class Repository:
 
     def get_recordings(self):
         return self.__recordings
-
-    # def get_recordings_for_user(self, email):
-    #     user = (
-    #         self.__db.session.query(User)
-    #         .options(joinedload(User.recordings))
-    #         .filter(User.email == email)
-    #         .first()
-    #     )
-    #
-    #     serialized_recordings = [recording.json() for recording in recordings]
-    #     print(serialized_recordings)
-    #     return serialized_recordings
-
-    # @property
-    # def paths(self):
-    #     return self.__paths
-    #
-    # @paths.setter
-    # def paths(self, values):
-    #     self.__paths = values
-    #
-    # @property
-    # def labels(self):
-    #     return self.__labels
-    #
-    # @labels.setter
-    # def labels(self, values):
-    #     self.__labels = values
-    #
-    # @property
-    # def intensity(self):
-    #     return self.__intensity
-    #
-    # @intensity.setter
-    # def intensity(self, values):
-    #     self.__intensity = values

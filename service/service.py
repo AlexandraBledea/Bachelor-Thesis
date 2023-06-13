@@ -1,27 +1,20 @@
-import pandas as pd
 from repository.repository import Repository
 from database import User, Recording
 from werkzeug.security import check_password_hash, generate_password_hash
-import jwt
-import os
-from datetime import datetime, timedelta
-from flask_jwt_extended import  create_access_token
+from datetime import timedelta
+from flask_jwt_extended import create_access_token
 from models.Strategy import Strategy
+from models.romanian_alexandra_repetition_based_model import RomanianAlexandraRepetitionBasedModel
+from models.romanian_alexandra_spectral_axis_model import RomanianAlexandraSpectralAxisModel
+from models.english_ravdess_repetition_based_model import EnglishRavdessRepetitionBasedModel
+from models.english_ravdess_spectral_axis_model import EnglishRavdessSpectralAxisModel
+from models.english_ravdess_extended_repetition_based_model import EnglishRavdessExtendedRepetitionBasedModel
+from models.romanian_alexandra_multi_time_steps_model import RomanianAlexandraMultiTimeStepsModel
+from models.english_ravdess_multi_time_steps_model import EnglishRavdessMultiTimeStepsModel
+from collections import Counter
 
-from models.EnglishTessModel import EnglishTessModel
-from models.EnglishRavdessModel import EnglishRavdessModel
-from models.EnglishRavdessModel2 import EnglishRavdessModel2
-from models.EnglishRavdessModel3 import EnglishRavdessModel3
 
-from models.EnglishModel import FirstModel
-from models.EnglishRavdessAlexandra import EnglishRavdessAlexandra
-from models.EnglishRavdessAlexandra2 import EnglishRavdessAlexandra2
-from models.EnglishRavdessModelBunCorect import EnglishRavdessModelBunCorect
-from models.EnglishRavdessAlexandraDATASET import EnglishRavdessAlexandraDATASET
-from models.EnglishRavdessAlexandraDATASET2 import EnglishRavdessAlexandraDATASET2
-from models.EnglishRavdessAlexandraDATASET_Multi_Feature import EnglishRavdessAlexandraDATASET_Multi_Feature
 class Service:
-
     strategy: Strategy
 
     def __init__(self, database):
@@ -30,42 +23,44 @@ class Service:
         self.__initialize_models()
 
     def __initialize_models(self):
-        self.__strategies['English Tess'] = EnglishRavdessAlexandraDATASET_Multi_Feature()
-        self.__strategies['English Ravdess'] = EnglishRavdessAlexandraDATASET()
+        self.__strategies['Alexandra Repetition Based'] = RomanianAlexandraRepetitionBasedModel()
+        self.__strategies['Alexandra Spectral Axis'] = RomanianAlexandraSpectralAxisModel()
+        self.__strategies['Ravdess Spectral Axis'] = EnglishRavdessSpectralAxisModel()
+        self.__strategies['Ravdess Repetition Based'] = EnglishRavdessRepetitionBasedModel()
+        self.__strategies['Ravdess Extended Repetition Based'] = EnglishRavdessExtendedRepetitionBasedModel()
+        self.__strategies['Ravdess Multi Time Steps'] = EnglishRavdessMultiTimeStepsModel()
+        self.__strategies['Alexandra Multi Time Steps'] = RomanianAlexandraMultiTimeStepsModel()
 
-    def predict_emotion(self, strategy_name, audio, actual_emotion):
-        return self.__strategies[strategy_name].execute(audio, actual_emotion)
+    def predict_emotion(self, strategy_name, audio):
+        return self.__strategies[strategy_name].execute(audio)
 
-    def add_recording(self, actualEmotion, audio, model, email, predicted_emotion, statistics):
+    def add_recording(self, actual_emotion, audio, model, email, predicted_emotion, statistics):
 
-        new_recording = Recording(actualEmotion, predicted_emotion, bytes(audio), model, email,
+        new_recording = Recording(actual_emotion, predicted_emotion, bytes(audio), model, email,
                                   str(statistics))
-
 
         self.__repository.add_recording(new_recording)
 
         return new_recording
 
-    def find_best_model(self, audio, actual_emotion):
+    def find_best_model(self, audio):
 
         final_predictions = []
-        final_percentages = []
-        final_statistics = []
         strategy_name = []
 
         for strategy in self.__strategies.values():
-            prediction, statistics = strategy.execute(audio, actual_emotion)
+            prediction, statistics = strategy.execute(audio)
 
             strategy_name.append(strategy.get_strategy_name())
             final_predictions.append(prediction)
-            final_percentages.append(statistics[actual_emotion])
-            final_statistics.append(statistics)
 
-        index = final_percentages.index(max(final_percentages))
-        model_name = strategy_name[index]
+        # Count the occurrences of each predicted emotion
+        emotion_counts = Counter(final_predictions)
 
-        return model_name, final_predictions[index], final_statistics[index]
+        # Get the emotion with the highest count
+        majority_emotion = emotion_counts.most_common(1)[0][0]
 
+        return "Collective prediction model", majority_emotion
 
     def register_user(self, data):
         user = self.__repository.find_user_by_email(data['email'])
@@ -117,12 +112,10 @@ class Service:
                 expiration_time = timedelta(minutes=60)
                 token = create_access_token(identity=data['email'], expires_delta=expiration_time)
 
-
                 self.__repository.initialize_recordings(data['email'])
 
                 response = {'token': token}
                 return response
-
 
         return {'token': ''}
 
@@ -141,4 +134,3 @@ class Service:
         else:
 
             return {'Message': 'No user with the given email address'}
-

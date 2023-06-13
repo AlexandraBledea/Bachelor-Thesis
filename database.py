@@ -1,7 +1,3 @@
-import ast
-import base64
-import json
-
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
@@ -59,12 +55,6 @@ class Recording(db.Model):
 
     def json(self):
         audio_numbers = [x for x in self.audio]
-
-        # string = self.statistics_percentages.strip('{}')
-        # statistics_percentages = [round(float(num), 2) for num in string.split(',')]
-        #
-        # string = self.statistics_labels.strip('{}')
-        # statistics_labels = string.split(',')
 
         return {"email": self.email, "actualEmotion": self.actual_emotion, "predictedEmotion": self.predicted_emotion,
                 "audio": audio_numbers,
