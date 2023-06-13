@@ -1,9 +1,6 @@
 from flask import request, jsonify
 from flask_restful import Resource
-from database import db, Recording
 from flask_jwt_extended import jwt_required
-
-from models.Strategy import Strategy
 
 
 class EmotionViewExpert(Resource):
@@ -14,8 +11,6 @@ class EmotionViewExpert(Resource):
     @jwt_required()
     def post(self):
         data = request.get_json()
-
-        print(data['model'])
 
         result, statistics = self.__service.predict_emotion(data['model'], data['audio'])
 

@@ -1,7 +1,4 @@
-from sqlalchemy.orm import joinedload
-from werkzeug.security import generate_password_hash
-
-from database import User, Recording
+from database import User
 
 
 class Repository:

@@ -1,15 +1,12 @@
-import io
+import os
 from abc import ABC
-
 import librosa
 import numpy as np
 import pandas as pd
 from keras.models import load_model
-from matplotlib import pyplot as plt
 from sklearn.preprocessing import OneHotEncoder
 import joblib
-
-from features.FeaturesExtraction import DataProcessing
+from features.DataProcessing import DataProcessing
 from models.Strategy import Strategy
 
 
@@ -46,7 +43,13 @@ class EnglishRavdessExtendedRepetitionBasedModel(Strategy, ABC):
     def execute(self, recording):
         byte_array = bytes(recording)
         self.__save_and_load_temporary_file(byte_array)
-        return self.__predict_emotion()
+        prediction, statistics = self.__predict_emotion()
+        self.__delete_file()
+        return prediction, statistics
+
+    def __delete_file(self):
+        file_path = self.__path + 'temp.wav'
+        os.remove(file_path)
 
     def get_strategy_name(self):
         return "Ravdess Extended Repetition Based"
@@ -68,12 +71,8 @@ class EnglishRavdessExtendedRepetitionBasedModel(Strategy, ABC):
 
     def __process_features(self):
         x_predict = self.__get_features()
-
-        print(x_predict.shape)
         x_predict = np.expand_dims(x_predict, axis=1)
-        print(x_predict.shape)
         x_predict = np.transpose(x_predict)
-        print(x_predict.shape)
         x_predict = self.__scaler.transform(x_predict)
         x_predict = np.expand_dims(x_predict, axis=1)
         return x_predict

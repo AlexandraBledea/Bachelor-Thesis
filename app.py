@@ -7,18 +7,14 @@ from flask_restful import Api, Resource
 from flask_cors import CORS
 from functools import wraps
 from jwt.exceptions import ExpiredSignatureError
-
 from controllers.change_password_view import ChangePasswordView
 from controllers.login_view import  LoginView
 from controllers.predict_emotion_view_expert_user import EmotionViewExpert
 from controllers.register_view import RegisterView
 from controllers.recordings_view import RecordingsView
 from controllers.predict_emotion_view_simple_user import EmotionViewSimple
-
 from werkzeug.security import check_password_hash, generate_password_hash
 from service.service import Service
-
-
 from flask_jwt_extended import JWTManager
 
 load_dotenv()
@@ -70,63 +66,3 @@ api.add_resource((RecordingsView), '/recordings', resource_class_kwargs = {
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# def token_required(f):
-#     @wraps(f)
-#     def decorator(*args, **kwargs):
-#
-#         token = None
-#
-#         if 'token' in request.headers:
-#             token = request.headers['token']
-#
-#         if not token:
-#             return jsonify({'Token': 'a valid token is missing'})
-#
-#         try:
-#             data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
-#             if datetime.utcnow() > datetime.strptime(data["expiration"], "%Y-%m-%d %H:%M:%S.%f"):
-#                 print("JWT has expired")
-#                 return jsonify({'Token': 'token has expired'})
-#
-#             current_user = db.session.query(User).filter(User.email == data['email']).first()
-#         except:
-#             return jsonify({'Message': 'token is invalid'})
-#
-#         return f(*args, **kwargs)
-#
-#     return decorator
-#
-#
-# # Wrapper function to apply the decorator to the resource
-# def token_required_resource(resource):
-#     if hasattr(resource, 'post'):
-#         resource.post = token_required(resource.post)
-#     elif hasattr(resource, 'get'):
-#         resource.get = token_required(resource.get)
-#     elif hasattr(resource, 'put'):
-#         resource.put = token_required(resource.put)
-#     return resource

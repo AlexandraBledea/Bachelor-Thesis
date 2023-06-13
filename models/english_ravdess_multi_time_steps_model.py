@@ -1,15 +1,12 @@
-import io
+import os
 from abc import ABC
-
 import librosa
 import numpy as np
 import pandas as pd
 from keras.models import load_model
-from matplotlib import pyplot as plt
 from sklearn.preprocessing import OneHotEncoder
 import joblib
-
-from features.FeaturesExtraction import DataProcessing
+from features.DataProcessing import DataProcessing
 from models.Strategy import Strategy
 
 
@@ -38,7 +35,13 @@ class EnglishRavdessMultiTimeStepsModel(Strategy, ABC):
         self.__save_and_load_temporary_file(byte_array)
         signal, sample_rate = self.__load_temporary_file()
         signal = self.preprocess(signal)
-        return self.__predict_emotion(signal, sample_rate)
+        prediction, statistics = self.__predict_emotion(signal, sample_rate)
+        self.__delete_file()
+        return prediction, statistics
+
+    def __delete_file(self):
+        file_path = self.__path + 'temp.wav'
+        os.remove(file_path)
 
     def get_strategy_name(self):
         return "Ravdess Multi Time Steps"
@@ -57,6 +60,8 @@ class EnglishRavdessMultiTimeStepsModel(Strategy, ABC):
         return result
 
     def preprocess(self, recording):
+        # signal = DataProcessing.trim_silence(recording, 48000)
+        # signal = DataProcessing.normalize_volume(signal)
         signal = DataProcessing.pad_audio_ravdess(recording)
 
         return signal

@@ -1,22 +1,18 @@
-import io
+import os
 from abc import ABC
-
 import librosa
 import numpy as np
 import pandas as pd
 from keras.models import load_model
-from matplotlib import pyplot as plt
 from sklearn.preprocessing import OneHotEncoder
 import joblib
-
-from features.FeaturesExtraction import DataProcessing
+from features.DataProcessing import DataProcessing
 from models.Strategy import Strategy
 
 
 class RomanianAlexandraMultiTimeStepsModel(Strategy, ABC):
 
     def __init__(self):
-
         self.__path = "in-memory-models/romanian-alexandra-multi-time-steps/"
         self.__model = load_model(self.__path + "training_model_experiment_x.h5")
         self.__encoder = self.__load_one_hot_encoder()
@@ -38,7 +34,13 @@ class RomanianAlexandraMultiTimeStepsModel(Strategy, ABC):
         self.__save_and_load_temporary_file(byte_array)
         signal, sample_rate = self.__load_temporary_file()
         signal = self.preprocess(signal)
-        return self.__predict_emotion(signal, sample_rate)
+        prediction, statistics = self.__predict_emotion(signal, sample_rate)
+        self.__delete_file()
+        return prediction, statistics
+
+    def __delete_file(self):
+        file_path = self.__path + 'temp.wav'
+        os.remove(file_path)
 
     def get_strategy_name(self):
         return "Alexandra Multi Time Steps"

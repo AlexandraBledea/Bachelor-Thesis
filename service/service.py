@@ -43,15 +43,12 @@ class Service:
 
         return new_recording
 
-    def find_best_model(self, audio):
+    def find_best_prediction(self, audio):
 
         final_predictions = []
-        strategy_name = []
 
         for strategy in self.__strategies.values():
-            prediction, statistics = strategy.execute(audio)
-
-            strategy_name.append(strategy.get_strategy_name())
+            prediction, _ = strategy.execute(audio)
             final_predictions.append(prediction)
 
         # Count the occurrences of each predicted emotion
