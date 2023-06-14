@@ -15,9 +15,9 @@ class EnglishRavdessExtendedRepetitionBasedModel(Strategy, ABC):
     def __init__(self):
 
         self.__path = "in-memory-models/english-ravdess-extended-repetition-based/"
-        self.__model = load_model(self.__path + "training_model_experiment_x.h5")
-        self.__encoder = self.__load_one_hot_encoder()
-        self.__scaler = self.__load_standard_scaler()
+        # self.__model = load_model(self.__path + "training_model_experiment_x.h5")
+        # self.__encoder = self.__load_one_hot_encoder()
+        # self.__scaler = self.__load_standard_scaler()
 
     def __load_one_hot_encoder(self):
         features_ravdess = pd.read_csv(self.__path + 'features_ravdess.csv')
