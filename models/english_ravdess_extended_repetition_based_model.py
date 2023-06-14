@@ -14,7 +14,7 @@ class EnglishRavdessExtendedRepetitionBasedModel(Strategy, ABC):
 
     def __init__(self):
 
-        self.__path = "https://github.com/AlexandraBledea/Bachelor-Thesis-Backend/blob/00c5c8f2b76cef58849f762eb7b215f7f1264b21/in-memory-models/english-ravdess-extended-repetition-based/"
+        self.__path = "in-memory-models/english-ravdess-extended-repetition-based/"
         self.__model = load_model(self.__path + "training_model_experiment_x.h5")
         self.__encoder = self.__load_one_hot_encoder()
         self.__scaler = self.__load_standard_scaler()
