@@ -56,7 +56,6 @@ opt-einsum==3.3.0
 packaging==23.0
 pooch==1.6.0
 protobuf==3.19.6
-psycopg2==2.9.6
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pycparser==2.21
