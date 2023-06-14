@@ -106,7 +106,7 @@ class Service:
 
         if user is not None:
             if check_password_hash(user.password, data['password']):
-                expiration_time = timedelta(minutes=60)
+                expiration_time = timedelta(minutes=120)
                 token = create_access_token(identity=data['email'], expires_delta=expiration_time)
 
                 self.__repository.initialize_recordings(data['email'])
