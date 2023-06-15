@@ -79,7 +79,7 @@ if __name__ == '__main__':
     # context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     # context.load_cert_chain('spealsoul_azure.pem')
     context.use_privatekey_file('firebase.key')
-    context.use_certificate_file('firebase_client.crt')
+    context.use_certificate_file('firebase_auth.crt')
     app.run(debug=True, ssl_context=context)
 
     # app.run(ssl_context='adhoc')
