@@ -14,10 +14,10 @@ class RomanianAlexandraRepetitionBasedModel(Strategy, ABC):
 
     def __init__(self):
 
-        self.__path = "C:\\Users\\night\\Desktop\\Facultate An 3\\Thesis\\Github\\Bachelor-Thesis-Backend\\in-memory-models\\romanian-alexandra-repetition-based\\"
-        # self.__model = load_model(self.__path + "training_model_experiment_x.h5")
-        # self.__encoder = self.__load_one_hot_encoder()
-        # self.__scaler = self.__load_standard_scaler()
+        self.__path = "in-memory-models/romanian-alexandra-repetition-based/"
+        self.__model = load_model(self.__path + "training_model_experiment_x.h5")
+        self.__encoder = self.__load_one_hot_encoder()
+        self.__scaler = self.__load_standard_scaler()
 
     def __load_one_hot_encoder(self):
         features = pd.read_csv(self.__path + 'features.csv')
@@ -27,7 +27,7 @@ class RomanianAlexandraRepetitionBasedModel(Strategy, ABC):
         return enc
 
     def __load_standard_scaler(self):
-        scaler = joblib.load(self.__path + 'scaler.pk1')
+        scaler = joblib.load(self.__path + 'scaler.joblib')
         return scaler
 
     def execute(self, recording):
