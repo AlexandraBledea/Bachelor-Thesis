@@ -40,7 +40,6 @@ def create_app():
     db = init_app(app)
     jwt = JWTManager(app)
     Migrate(app, db)
-    SSLify(app)
     CORS(app, origins=['https://discover-your-emotions.web.app', 'http://localhost:4200'])
     api = Api(app)
     service = Service(db)
@@ -81,12 +80,8 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    context = SSL.Context(SSL.PROTOCOL_TLSv1_2)
     context.use_privatekey_file('speaksoul-privateKey.key')
     context.use_certificate_file('speaksoul.crt')
-    app.wsgi_app = ProxyFix(
-        app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
-    )
     app.run(debug=True, ssl_context=context)
 
     # app.run(ssl_context='adhoc')
