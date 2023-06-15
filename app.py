@@ -77,9 +77,9 @@ api.add_resource((RecordingsView), '/recordings', resource_class_kwargs={
 
 
 if __name__ == '__main__':
-    context.use_privatekey_file('speaksoul-privateKey.key')
-    context.use_certificate_file('speaksoul.crt')
-    app.run(debug=True, ssl_context=context)
+    # context.use_privatekey_file('speaksoul-privateKey.key')
+    # context.use_certificate_file('speaksoul.crt')
+    app.run(debug=True)
 
     # app.run(ssl_context='adhoc')
     # app.run(ssl_context='adhoc')
