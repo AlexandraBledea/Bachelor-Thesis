@@ -19,6 +19,8 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from service.service import Service
 from flask_jwt_extended import JWTManager
 
+from OpenSSL import SSL
+
 load_dotenv()
 
 
@@ -69,11 +71,15 @@ def create_app():
         'service': service
     })
 
+
     return app
 
 
 if __name__ == '__main__':
     app = create_app()
-    context = ('speaksoul.crt', 'speaksoul-privateKey.key')  # Replace with the actual paths to your SSL/TLS certificates
+    context = SSL.Context(SSL.PROTOCOL_TLSv1_2)
+    context.use_privatekey_file('speaksoul-privateKey.key')
+    context.use_certificate_file('speaksoul.crt')
     app.run(debug=True, ssl_context=context)
-    app.run(ssl_context='adhoc')
+    # app.run(ssl_context='adhoc')
+    # app.run(ssl_context='adhoc')
