@@ -29,7 +29,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://' + os.getenv("DB_USER") +
 db = init_app(app)
 jwt = JWTManager(app)
 Migrate(app, db)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "http://localhost:5000"}})
 api = Api(app)
 service = Service(db)
 
