@@ -18,6 +18,9 @@ from controllers.predict_emotion_view_simple_user import EmotionViewSimple
 from werkzeug.security import check_password_hash, generate_password_hash
 from service.service import Service
 from flask_jwt_extended import JWTManager
+from werkzeug.middleware.proxy_fix import ProxyFix
+
+
 
 from OpenSSL import SSL
 
@@ -37,6 +40,7 @@ def create_app():
     db = init_app(app)
     jwt = JWTManager(app)
     Migrate(app, db)
+    SSLify(app)
     CORS(app, origins=['https://discover-your-emotions.web.app', 'http://localhost:4200'])
     api = Api(app)
     service = Service(db)
@@ -80,6 +84,10 @@ if __name__ == '__main__':
     context = SSL.Context(SSL.PROTOCOL_TLSv1_2)
     context.use_privatekey_file('speaksoul-privateKey.key')
     context.use_certificate_file('speaksoul.crt')
+    app.wsgi_app = ProxyFix(
+        app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
+    )
     app.run(debug=True, ssl_context=context)
+
     # app.run(ssl_context='adhoc')
     # app.run(ssl_context='adhoc')
