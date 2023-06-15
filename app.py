@@ -35,7 +35,7 @@ def create_app():
     db = init_app(app)
     jwt = JWTManager(app)
     Migrate(app, db)
-    CORS(app, origins=['https://discover-your-emotions.web.app'])
+    CORS(app, origins=['https://discover-your-emotions.web.app', 'http://localhost:4200'])
     api = Api(app)
     service = Service(db)
     app.debug = False  # Disable debug mode
