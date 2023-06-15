@@ -78,9 +78,9 @@ api.add_resource((RecordingsView), '/recordings', resource_class_kwargs={
 
 if __name__ == '__main__':
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-    context.load_cert_chain('spealsoul_azure.pem')
+    # context.load_cert_chain('spealsoul_azure.pem')
     context.use_privatekey_file('speaksoul-privateKey.key')
-    # context.use_certificate_file('speaksoul.crt')
+    context.use_certificate_file('speaksoul.crt')
     app.run(debug=True, ssl_context=context)
 
     # app.run(ssl_context='adhoc')
