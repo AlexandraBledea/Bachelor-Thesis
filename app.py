@@ -27,59 +27,55 @@ from OpenSSL import SSL
 load_dotenv()
 
 
-def create_app():
-
-    app = Flask(__name__)
 
 
-    app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://' + os.getenv("DB_USER") + \
-                                            ':' + os.getenv("DB_PASSWORD") + '@' + \
-                                            os.getenv("DB_HOST") + '/' + os.getenv("DB_NAME")
-
-    db = init_app(app)
-    jwt = JWTManager(app)
-    Migrate(app, db)
-    CORS(app, origins=['https://discover-your-emotions.web.app', 'http://localhost:4200'])
-    api = Api(app)
-    service = Service(db)
-    app.debug = False  # Disable debug mode
-
-    app.config["JWT_TOKEN_LOCATION"] = ["headers"]
-    app.config["JWT_HEADER_NAME"] = "Authorization"
-    app.config["JWT_HEADER_TYPE"] = "Bearer"
-    app.config['PROPAGATE_EXCEPTIONS'] = True
-
-    api.add_resource(LoginView, '/login', resource_class_kwargs={
-        'service': service
-    })
-
-    api.add_resource(ChangePasswordView, '/login/change-password', resource_class_kwargs={
-        'service': service
-    })
-
-    api.add_resource(RegisterView, '/register', resource_class_kwargs={
-        'service': service
-    })
-
-    api.add_resource((EmotionViewExpert), '/get-prediction-expert-user', resource_class_kwargs={
-        'service': service,
-    })
-
-    api.add_resource((EmotionViewSimple), '/get-prediction-simple-user', resource_class_kwargs={
-        'service': service,
-    })
-
-    api.add_resource((RecordingsView), '/recordings', resource_class_kwargs={
-        'service': service
-    })
+app = Flask(__name__)
 
 
-    return app
+app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://' + os.getenv("DB_USER") + \
+                                        ':' + os.getenv("DB_PASSWORD") + '@' + \
+                                        os.getenv("DB_HOST") + '/' + os.getenv("DB_NAME")
+
+db = init_app(app)
+jwt = JWTManager(app)
+Migrate(app, db)
+CORS(app, origins=['https://discover-your-emotions.web.app', 'http://localhost:4200'])
+api = Api(app)
+service = Service(db)
+app.debug = False  # Disable debug mode
+
+app.config["JWT_TOKEN_LOCATION"] = ["headers"]
+app.config["JWT_HEADER_NAME"] = "Authorization"
+app.config["JWT_HEADER_TYPE"] = "Bearer"
+app.config['PROPAGATE_EXCEPTIONS'] = True
+
+api.add_resource(LoginView, '/login', resource_class_kwargs={
+    'service': service
+})
+
+api.add_resource(ChangePasswordView, '/login/change-password', resource_class_kwargs={
+    'service': service
+})
+
+api.add_resource(RegisterView, '/register', resource_class_kwargs={
+    'service': service
+})
+
+api.add_resource((EmotionViewExpert), '/get-prediction-expert-user', resource_class_kwargs={
+    'service': service,
+})
+
+api.add_resource((EmotionViewSimple), '/get-prediction-simple-user', resource_class_kwargs={
+    'service': service,
+})
+
+api.add_resource((RecordingsView), '/recordings', resource_class_kwargs={
+    'service': service
+})
 
 
 if __name__ == '__main__':
-    app = create_app()
     context.use_privatekey_file('speaksoul-privateKey.key')
     context.use_certificate_file('speaksoul.crt')
     app.run(debug=True, ssl_context=context)
