@@ -27,7 +27,7 @@ class RomanianAlexandraRepetitionBasedModel(Strategy, ABC):
         return enc
 
     def __load_standard_scaler(self):
-        scaler = joblib.load(self.__path + 'scaler.joblib')
+        scaler = joblib.load(self.__path + 'scaler.pkl')
         return scaler
 
     def execute(self, recording):
