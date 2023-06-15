@@ -74,4 +74,6 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
+    context = ('speaksoul.crt', 'speaksoul-privateKey.key')  # Replace with the actual paths to your SSL/TLS certificates
+    app.run(debug=True, ssl_context=context)
     app.run(ssl_context='adhoc')
