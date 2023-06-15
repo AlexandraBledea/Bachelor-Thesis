@@ -78,8 +78,8 @@ if __name__ == '__main__':
     app = create_app()
     # context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     # context.load_cert_chain('spealsoul_azure.pem')
-    context.use_privatekey_file('firebase.key')
-    context.use_certificate_file('firebase_auth.crt')
+    context.use_privatekey_file('speaksoul-privateKey.key')
+    context.use_certificate_file('speaksoul.crt')
     app.run(debug=True, ssl_context=context)
 
     # app.run(ssl_context='adhoc')
