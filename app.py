@@ -40,7 +40,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://' + os.getenv("DB_USER") +
 db = init_app(app)
 jwt = JWTManager(app)
 Migrate(app, db)
-CORS(app, origins=['https://discover-your-emotions.web.app', 'http://localhost:4200'])
+CORS(app)
 api = Api(app)
 service = Service(db)
 app.debug = False  # Disable debug mode
