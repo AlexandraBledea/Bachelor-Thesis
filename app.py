@@ -39,6 +39,7 @@ app.config["JWT_HEADER_TYPE"] = "Bearer"
 app.config['PROPAGATE_EXCEPTIONS'] = True
 
 
+
 api.add_resource(LoginView, '/login', resource_class_kwargs={
     'service': service
 })
