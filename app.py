@@ -18,12 +18,6 @@ from controllers.predict_emotion_view_simple_user import EmotionViewSimple
 from werkzeug.security import check_password_hash, generate_password_hash
 from service.service import Service
 from flask_jwt_extended import JWTManager
-from werkzeug.middleware.proxy_fix import ProxyFix
-from flask_sslify import SSLify
-
-
-from OpenSSL import SSL
-
 load_dotenv()
 
 
