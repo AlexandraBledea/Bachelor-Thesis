@@ -35,7 +35,6 @@ class RomanianAlexandraMultiTimeStepsModel(Strategy, ABC):
         signal, sample_rate = self.__load_temporary_file()
         signal = self.preprocess(signal)
         prediction, statistics = self.__predict_emotion(signal, sample_rate)
-        self.__delete_file()
         return prediction, statistics
 
     def __delete_file(self):

@@ -34,7 +34,6 @@ class EnglishRavdessRepetitionBasedModel(Strategy, ABC):
         byte_array = bytes(recording)
         self.__save_and_load_temporary_file(byte_array)
         prediction, statistics = self.__predict_emotion()
-        self.__delete_file()
         return prediction, statistics
 
     def get_strategy_name(self):
